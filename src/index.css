@@ -17,17 +17,17 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 215 25% 15%;
 
-    --primary: 25 45% 40%;
+    --primary: 0 100% 40%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 25 45% 35%;
+    --primary-hover: 0 100% 35%;
 
-    --secondary: 20 15% 92%;
-    --secondary-foreground: 25 25% 25%;
+    --secondary: 142 76% 36%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 20 15% 95%;
-    --muted-foreground: 25 15% 55%;
+    --muted: 142 15% 95%;
+    --muted-foreground: 142 15% 55%;
 
-    --accent: 35 70% 45%;
+    --accent: 0 70% 45%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 75% 55%;
@@ -45,9 +45,9 @@ All colors MUST be HSL.
 
     --radius: 0.75rem;
 
-    /* Professional geological monitoring colors */
-    --gradient-primary: linear-gradient(135deg, hsl(25, 45%, 40%), hsl(30, 40%, 45%));
-    --gradient-danger: linear-gradient(135deg, hsl(0, 75%, 55%), hsl(15, 70%, 50%));
+    /* Red and green theme colors */
+    --gradient-primary: linear-gradient(135deg, hsl(0, 100%, 40%), hsl(0, 90%, 45%));
+    --gradient-secondary: linear-gradient(135deg, hsl(142, 76%, 36%), hsl(142, 70%, 40%));
     --gradient-success: linear-gradient(135deg, hsl(140, 50%, 45%), hsl(150, 45%, 40%));
     --gradient-warning: linear-gradient(135deg, hsl(35, 85%, 50%), hsl(40, 80%, 55%));
     

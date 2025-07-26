@@ -20,15 +20,8 @@ const Home = () => {
         <div className="relative overflow-hidden">
           <div className="max-w-7xl mx-auto py-8">
             <div className="text-center space-y-6 animate-fade-in">
-              <div className="flex justify-center mb-6">
-                <Badge variant="outline" className="px-4 py-2 text-sm font-medium">
-                  <Activity className="h-4 w-4 mr-2" />
-                  System Active & Monitoring
-                </Badge>
-              </div>
-              
               <h1 className="text-4xl md:text-6xl font-bold">
-                <span className="gradient-primary bg-clip-text text-transparent">
+                <span className="text-primary">
                   Landslide Early Warning
                 </span>
                 <br />
