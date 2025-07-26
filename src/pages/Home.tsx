@@ -15,10 +15,10 @@ import {
 const Home = () => {
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      <div className="space-y-8">
         {/* Hero Section */}
         <div className="relative overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="max-w-7xl mx-auto py-8">
             <div className="text-center space-y-6 animate-fade-in">
               <div className="flex justify-center mb-6">
                 <Badge variant="outline" className="px-4 py-2 text-sm font-medium">
@@ -87,7 +87,7 @@ const Home = () => {
         </div>
 
         {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto">
           <div className="space-y-8">
             {/* Current ML Status */}
             <div className="space-y-4">

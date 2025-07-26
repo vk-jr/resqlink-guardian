@@ -18,12 +18,13 @@ const WeatherMap = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [apiKey, setApiKey] = useState("d67c28bb330844a19e0135930252007");
   const [weatherData, setWeatherData] = useState<any>(null);
+  const [location, setLocation] = useState("New York");
   const { toast } = useToast();
 
-  const fetchWeatherData = async (lat: number = 40.7128, lon: number = -74.0060) => {
+  const fetchWeatherData = async (query: string = "New York") => {
     try {
       const response = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
+        `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${query}&aqi=yes`
       );
       
       if (!response.ok) {
@@ -52,14 +53,14 @@ const WeatherMap = () => {
       }, 2000);
 
       // Fetch initial weather data for demo location (New York)
-      await fetchWeatherData();
+      await fetchWeatherData(location);
     };
 
     initializeMap();
   }, [apiKey]);
 
   const refreshWeatherData = () => {
-    fetchWeatherData();
+    fetchWeatherData(location);
     toast({
       title: "Weather Data Refreshed",
       description: "Latest weather information has been loaded.",
@@ -104,58 +105,86 @@ const WeatherMap = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center space-x-4">
-            <div className="flex-1">
-              <label className="text-sm font-medium mb-2 block">OpenWeather API Key</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">WeatherAPI.com API Key</label>
               <Input
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
-                placeholder="Enter your OpenWeather API key"
+                placeholder="Enter your WeatherAPI.com API key"
                 type="password"
+                className="bg-background"
               />
             </div>
-            <Button onClick={() => fetchWeatherData()} className="mt-6">
-              Update
-            </Button>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Location</label>
+              <div className="flex space-x-2">
+                <Input
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="Enter city name or coordinates"
+                  className="bg-background"
+                />
+                <Button onClick={() => fetchWeatherData(location)}>
+                  Search
+                </Button>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Weather Data Display */}
       {weatherData && (
-        <Card className="shadow-card">
+        <Card className="shadow-card bg-gradient-to-br from-card via-card to-primary/5">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Cloud className="h-5 w-5 text-primary" />
-              <span>Current Weather - {weatherData.name}</span>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Cloud className="h-5 w-5 text-primary" />
+                <span>Current Weather - {weatherData.location.name}, {weatherData.location.country}</span>
+              </div>
+              <Badge variant="outline" className="text-xs">
+                Last updated: {new Date(weatherData.location.localtime).toLocaleTimeString()}
+              </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center p-4 bg-muted/50 rounded-lg">
-                <Thermometer className="h-8 w-8 text-orange-500 mx-auto mb-2" />
-                <div className="text-2xl font-bold">{Math.round(weatherData.main.temp)}°C</div>
-                <div className="text-sm text-muted-foreground">Temperature</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  Feels like {Math.round(weatherData.main.feels_like)}°C
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="text-center p-6 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20 rounded-xl border border-orange-200 dark:border-orange-800">
+                <Thermometer className="h-10 w-10 text-orange-600 mx-auto mb-3" />
+                <div className="text-3xl font-bold text-orange-700 dark:text-orange-400">{weatherData.current.temp_c}°C</div>
+                <div className="text-sm font-medium text-orange-600 dark:text-orange-300">Temperature</div>
+                <div className="text-xs text-muted-foreground mt-2">
+                  Feels like {weatherData.current.feelslike_c}°C
                 </div>
               </div>
               
-              <div className="text-center p-4 bg-muted/50 rounded-lg">
-                <Droplets className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-                <div className="text-2xl font-bold">{weatherData.main.humidity}%</div>
-                <div className="text-sm text-muted-foreground">Humidity</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  Pressure: {weatherData.main.pressure} hPa
+              <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20 rounded-xl border border-blue-200 dark:border-blue-800">
+                <Droplets className="h-10 w-10 text-blue-600 mx-auto mb-3" />
+                <div className="text-3xl font-bold text-blue-700 dark:text-blue-400">{weatherData.current.humidity}%</div>
+                <div className="text-sm font-medium text-blue-600 dark:text-blue-300">Humidity</div>
+                <div className="text-xs text-muted-foreground mt-2">
+                  Pressure: {weatherData.current.pressure_mb} mb
                 </div>
               </div>
               
-              <div className="text-center p-4 bg-muted/50 rounded-lg">
-                <Cloud className="h-8 w-8 text-gray-500 mx-auto mb-2" />
-                <div className="text-2xl font-bold capitalize">{weatherData.weather[0].description}</div>
-                <div className="text-sm text-muted-foreground">Conditions</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  Visibility: {weatherData.visibility / 1000} km
+              <div className="text-center p-6 bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-950/20 dark:to-slate-950/20 rounded-xl border border-gray-200 dark:border-gray-800">
+                <Cloud className="h-10 w-10 text-gray-600 mx-auto mb-3" />
+                <div className="text-lg font-bold text-gray-700 dark:text-gray-400 capitalize">{weatherData.current.condition.text}</div>
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-300">Conditions</div>
+                <div className="text-xs text-muted-foreground mt-2">
+                  Visibility: {weatherData.current.vis_km} km
+                </div>
+              </div>
+
+              <div className="text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-xl border border-green-200 dark:border-green-800">
+                <div className="h-10 w-10 mx-auto mb-3 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
+                  <span className="text-green-600 font-bold text-sm">AQI</span>
+                </div>
+                <div className="text-3xl font-bold text-green-700 dark:text-green-400">{weatherData.current.air_quality?.["us-epa-index"] || "N/A"}</div>
+                <div className="text-sm font-medium text-green-600 dark:text-green-300">Air Quality</div>
+                <div className="text-xs text-muted-foreground mt-2">
+                  Wind: {weatherData.current.wind_kph} km/h
                 </div>
               </div>
             </div>
