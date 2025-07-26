@@ -35,19 +35,19 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-card/80 backdrop-blur-md border-b border-border shadow-card sticky top-0 z-50">
+      <header className="bg-card/95 backdrop-blur-sm border-b border-border shadow-professional sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center space-x-3">
-              <div className="bg-gradient-primary rounded-xl p-2.5 shadow-glow">
-                <Shield className="h-7 w-7 text-white" />
+              <div className="bg-primary rounded-lg p-2.5 shadow-professional">
+                <Shield className="h-7 w-7 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                <h1 className="text-xl font-bold text-primary tracking-wide">
                   ResQlink Admin
                 </h1>
-                <p className="text-xs text-muted-foreground font-medium">Landslide Monitoring System</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Geological Monitoring</p>
               </div>
             </div>
 
@@ -63,8 +63,8 @@ const Layout = ({ children }: LayoutProps) => {
                     className={cn(
                       "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200",
                       isActive(item.href) 
-                        ? "bg-gradient-primary text-white shadow-glow" 
-                        : "hover:bg-accent/50 hover:text-accent-foreground"
+                        ? "bg-primary text-primary-foreground shadow-professional" 
+                        : "hover:bg-secondary hover:text-secondary-foreground"
                     )}
                   >
                     <a href={item.href}>
@@ -119,7 +119,7 @@ const Layout = ({ children }: LayoutProps) => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 bg-gradient-to-br from-background via-background to-accent/5 min-h-screen">
+      <main className="flex-1 bg-gradient-to-br from-background via-background to-muted/30 min-h-screen">
         <div className="p-6">
           {children}
         </div>
