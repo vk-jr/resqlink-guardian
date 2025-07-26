@@ -1,0 +1,136 @@
+import { useState } from "react";
+import { useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { 
+  MapPin, 
+  Activity, 
+  Brain, 
+  Home, 
+  Menu, 
+  X,
+  Shield
+} from "lucide-react";
+
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+const Layout = ({ children }: LayoutProps) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+
+  const navigation = [
+    { name: "Home", href: "/", icon: Home },
+    { name: "Live Weather Map", href: "/weather-map", icon: MapPin },
+    { name: "Sensor Data", href: "/sensor-data", icon: Activity },
+    { name: "ML Output", href: "/ml-output", icon: Brain },
+  ];
+
+  const isActive = (href: string) => {
+    if (href === "/") return location.pathname === "/";
+    return location.pathname.startsWith(href);
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="bg-card border-b border-border shadow-card">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <div className="flex items-center space-x-2">
+              <div className="bg-primary rounded-lg p-2">
+                <Shield className="h-6 w-6 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold gradient-primary bg-clip-text text-transparent">
+                  ResQlink
+                </h1>
+                <p className="text-xs text-muted-foreground">Landslide Early Warning</p>
+              </div>
+            </div>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex space-x-1">
+              {navigation.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Button
+                    key={item.name}
+                    variant={isActive(item.href) ? "default" : "ghost"}
+                    asChild
+                    className={cn(
+                      "flex items-center space-x-2",
+                      isActive(item.href) && "shadow-glow"
+                    )}
+                  >
+                    <a href={item.href}>
+                      <Icon className="h-4 w-4" />
+                      <span>{item.name}</span>
+                    </a>
+                  </Button>
+                );
+              })}
+            </nav>
+
+            {/* Mobile menu button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="md:hidden"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Mobile Navigation */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-border bg-card animate-fade-in">
+            <nav className="px-4 py-2 space-y-1">
+              {navigation.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Button
+                    key={item.name}
+                    variant={isActive(item.href) ? "default" : "ghost"}
+                    asChild
+                    className="w-full justify-start space-x-2"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <a href={item.href}>
+                      <Icon className="h-4 w-4" />
+                      <span>{item.name}</span>
+                    </a>
+                  </Button>
+                );
+              })}
+            </nav>
+          </div>
+        )}
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-1">
+        {children}
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-card border-t border-border mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="text-center text-sm text-muted-foreground">
+            <p>© 2024 ResQlink. Protecting communities through early warning systems.</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default Layout;

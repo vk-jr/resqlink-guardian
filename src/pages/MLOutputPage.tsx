@@ -1,0 +1,163 @@
+import Layout from "@/components/Layout";
+import MLOutputCard from "@/components/MLOutputCard";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Brain, 
+  TrendingUp, 
+  AlertTriangle, 
+  CheckCircle,
+  Clock,
+  BarChart3
+} from "lucide-react";
+
+const MLOutputPage = () => {
+  return (
+    <Layout>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-6">
+          <div className="text-center space-y-4">
+            <h1 className="text-3xl font-bold gradient-primary bg-clip-text text-transparent">
+              Machine Learning Predictions
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Advanced AI-powered analysis combining sensor data, weather patterns, and historical 
+              records to predict landslide risk with high accuracy.
+            </p>
+          </div>
+
+          {/* Current ML Prediction */}
+          <MLOutputCard />
+
+          {/* ML Model Information */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="shadow-card">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Brain className="h-5 w-5 text-primary" />
+                  <span>Model Performance</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-4 bg-success/10 rounded-lg">
+                    <CheckCircle className="h-8 w-8 text-success mx-auto mb-2" />
+                    <div className="text-2xl font-bold text-success">87%</div>
+                    <div className="text-sm text-muted-foreground">Accuracy</div>
+                  </div>
+                  
+                  <div className="text-center p-4 bg-primary/10 rounded-lg">
+                    <TrendingUp className="h-8 w-8 text-primary mx-auto mb-2" />
+                    <div className="text-2xl font-bold text-primary">94%</div>
+                    <div className="text-sm text-muted-foreground">Precision</div>
+                  </div>
+                </div>
+                
+                <div className="pt-4 border-t border-border">
+                  <h4 className="font-semibold mb-2">Model Features</h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="outline" className="text-xs">Real-time</Badge>
+                      <span className="text-sm">Sensor data integration</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="outline" className="text-xs">Historical</Badge>
+                      <span className="text-sm">Weather pattern analysis</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="outline" className="text-xs">Geospatial</Badge>
+                      <span className="text-sm">Terrain risk assessment</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-card">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Clock className="h-5 w-5 text-accent" />
+                  <span>Prediction Timeline</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-destructive/10 rounded-lg border-l-4 border-destructive">
+                    <div>
+                      <div className="font-medium text-destructive">High Risk</div>
+                      <div className="text-sm text-muted-foreground">0-6 hours</div>
+                    </div>
+                    <AlertTriangle className="h-5 w-5 text-destructive" />
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 bg-warning/10 rounded-lg border-l-4 border-warning">
+                    <div>
+                      <div className="font-medium text-warning">Medium Risk</div>
+                      <div className="text-sm text-muted-foreground">6-24 hours</div>
+                    </div>
+                    <Clock className="h-5 w-5 text-warning" />
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 bg-success/10 rounded-lg border-l-4 border-success">
+                    <div>
+                      <div className="font-medium text-success">Low Risk</div>
+                      <div className="text-sm text-muted-foreground">24+ hours</div>
+                    </div>
+                    <CheckCircle className="h-5 w-5 text-success" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Data Sources */}
+          <Card className="shadow-card">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <BarChart3 className="h-5 w-5 text-accent" />
+                <span>Data Sources & Inputs</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="text-blue-600 font-bold">🌧️</span>
+                  </div>
+                  <h4 className="font-semibold mb-1">Weather Data</h4>
+                  <p className="text-xs text-muted-foreground">Rainfall, humidity, temperature from 150+ sensors</p>
+                </div>
+                
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="text-green-600 font-bold">🌍</span>
+                  </div>
+                  <h4 className="font-semibold mb-1">Ground Sensors</h4>
+                  <p className="text-xs text-muted-foreground">Vibration, soil moisture, slope stability</p>
+                </div>
+                
+                <div className="text-center p-4 bg-purple-50 rounded-lg">
+                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="text-purple-600 font-bold">🛰️</span>
+                  </div>
+                  <h4 className="font-semibold mb-1">Satellite Data</h4>
+                  <p className="text-xs text-muted-foreground">Terrain analysis, vegetation, land use</p>
+                </div>
+                
+                <div className="text-center p-4 bg-orange-50 rounded-lg">
+                  <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="text-orange-600 font-bold">📊</span>
+                  </div>
+                  <h4 className="font-semibold mb-1">Historical Data</h4>
+                  <p className="text-xs text-muted-foreground">Past events, seasonal patterns, geology</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </Layout>
+  );
+};
+
+export default MLOutputPage;
