@@ -80,17 +80,17 @@ const AlertSection = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Citizen Alert */}
-          <Card className="border-2 border-primary/20 hover:border-primary/40 transition-colors">
-            <CardContent className="p-6 text-center space-y-4">
-              <div className="p-3 bg-primary/10 rounded-full w-fit mx-auto">
-                <Users className="h-8 w-8 text-primary" />
+          <Card className="border border-primary/20 hover:border-primary/40 transition-colors">
+            <CardContent className="p-4 text-center">
+              <div className="p-2 bg-primary/10 rounded-full w-fit mx-auto mb-2">
+                <Users className="h-6 w-6 text-primary" />
               </div>
-              <div>
-                <h4 className="font-semibold text-lg mb-2">Alert Citizens</h4>
-                <p className="text-sm text-muted-foreground mb-4">
+              <div className="space-y-1">
+                <h4 className="font-semibold">Alert Citizens</h4>
+                <p className="text-xs text-muted-foreground">
                   Notify all registered citizens in the risk zone via SMS, app notifications, and local sirens.
                 </p>
-                <div className="flex items-center justify-center space-x-2 text-xs text-muted-foreground mb-4">
+                <div className="flex items-center justify-center space-x-1 text-xs text-muted-foreground">
                   <Phone className="h-3 w-3" />
                   <span>SMS + App + Sirens</span>
                 </div>
@@ -98,8 +98,8 @@ const AlertSection = () => {
               <Button
                 onClick={() => handleAlert('citizen')}
                 disabled={isLoading === 'citizen'}
-                className="w-full gradient-primary shadow-glow"
-                size="lg"
+                className="w-full gradient-primary shadow-glow mt-3"
+                size="sm"
               >
                 {isLoading === 'citizen' ? (
                   <>
@@ -117,17 +117,17 @@ const AlertSection = () => {
           </Card>
 
           {/* Representative Alert */}
-          <Card className="border-2 border-accent/20 hover:border-accent/40 transition-colors">
-            <CardContent className="p-6 text-center space-y-4">
-              <div className="p-3 bg-accent/10 rounded-full w-fit mx-auto">
-                <UserCheck className="h-8 w-8 text-accent" />
+          <Card className="border border-accent/20 hover:border-accent/40 transition-colors">
+            <CardContent className="p-4 text-center">
+              <div className="p-2 bg-accent/10 rounded-full w-fit mx-auto mb-2">
+                <UserCheck className="h-6 w-6 text-accent" />
               </div>
-              <div>
-                <h4 className="font-semibold text-lg mb-2">Alert Representatives</h4>
-                <p className="text-sm text-muted-foreground mb-4">
+              <div className="space-y-1">
+                <h4 className="font-semibold">Alert Representatives</h4>
+                <p className="text-xs text-muted-foreground">
                   Notify government officials, emergency services, and local authorities for immediate response.
                 </p>
-                <div className="flex items-center justify-center space-x-2 text-xs text-muted-foreground mb-4">
+                <div className="flex items-center justify-center space-x-1 text-xs text-muted-foreground">
                   <Phone className="h-3 w-3" />
                   <span>Emergency Contacts</span>
                 </div>
@@ -135,8 +135,8 @@ const AlertSection = () => {
               <Button
                 onClick={() => handleAlert('representative')}
                 disabled={isLoading === 'representative'}
-                className="w-full gradient-success"
-                size="lg"
+                className="w-full gradient-success mt-3"
+                size="sm"
               >
                 {isLoading === 'representative' ? (
                   <>
