@@ -57,22 +57,45 @@ const SensorDashboard = () => {
   const fetchSensorData = async () => {
     setIsLoading(true);
     try {
-      // In a real application, this would fetch from Supabase
-      // const { data, error } = await supabase
-      //   .from('sensor_readings')
-      //   .select('*')
-      //   .order('timestamp', { ascending: false })
-      //   .limit(24);
+      // Get the table information first to see available columns
+      const { data, error } = await supabase
+        .from('sensor_data')
+        .select(`
+          id,
+          timestamp,
+          soil_moisture,
+          pore_water_pressure
+        `)
+        .order('timestamp', { ascending: true });
 
-      // For demo purposes, generate realistic data
-      const data = generateSensorData();
-      setSensorData(data);
-      setLastUpdate(new Date());
-      
-      toast({
-        title: "Sensor Data Updated",
-        description: "Latest sensor readings have been loaded.",
-      });
+      // Log the first row to see the structure
+      if (data && data.length > 0) {
+        console.log('First row structure:', data[0]);
+      }
+
+      console.log('Fetched data:', data);
+      console.log('Fetch error if any:', error);
+
+      if (error) {
+        console.error('Detailed error:', error);
+        throw error;
+      }
+
+      if (data && data.length > 0) {
+        setSensorData(data);
+        setLastUpdate(new Date());
+        
+        toast({
+          title: "Sensor Data Updated",
+          description: `Loaded ${data.length} readings from the database.`,
+        });
+      } else {
+        toast({
+          title: "No Data Found",
+          description: "No sensor readings available in the database.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error('Error fetching sensor data:', error);
       toast({
@@ -86,12 +109,30 @@ const SensorDashboard = () => {
   };
 
   useEffect(() => {
+    // Initial fetch
     fetchSensorData();
-    
-    // Auto-refresh every 5 minutes
-    const interval = setInterval(fetchSensorData, 5 * 60 * 1000);
-    
-    return () => clearInterval(interval);
+
+    // Set up real-time subscription
+    const subscription = supabase
+      .channel('sensor_updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'sensor_data'
+        },
+        async (payload) => {
+          // Fetch latest data when any change occurs
+          await fetchSensorData();
+        }
+      )
+      .subscribe();
+
+    // Clean up subscription when component unmounts
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const formatChartData = () => {
@@ -100,10 +141,8 @@ const SensorDashboard = () => {
         hour: '2-digit', 
         minute: '2-digit' 
       }),
-      rainfall: item.rainfall,
-      vibration: item.vibration,
-      temperature: item.temperature,
-      moisture: item.moisture
+      moisture: item.soil_moisture,
+      pore_water_pressure: item.pore_water_pressure
     }));
   };
 
@@ -114,11 +153,11 @@ const SensorDashboard = () => {
   };
 
   const getRiskLevel = () => {
-    const avgRainfall = getAverageReading('rainfall');
-    const avgVibration = getAverageReading('vibration');
+    const latestReading = sensorData[sensorData.length - 1];
+    if (!latestReading) return 'low';
     
-    if (avgRainfall > 30 || avgVibration > 7) return 'high';
-    if (avgRainfall > 15 || avgVibration > 4) return 'medium';
+    if (latestReading.danger) return 'high';
+    if (latestReading.alert) return 'medium';
     return 'low';
   };
 
@@ -268,35 +307,8 @@ const SensorDashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Temperature & Moisture */}
+      {/* Soil Parameters */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Thermometer className="h-5 w-5 text-orange-500" />
-              <span>Temperature Trend</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-              <AreaChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="time" />
-                <YAxis />
-                <Tooltip />
-                <Area 
-                  type="monotone" 
-                  dataKey="temperature" 
-                  stroke="#f97316" 
-                  fill="#f97316"
-                  fillOpacity={0.3}
-                  name="Temperature (°C)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
         <Card className="shadow-card">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
@@ -306,17 +318,47 @@ const SensorDashboard = () => {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={chartData}>
+              <AreaChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="time" />
+                <YAxis domain={[0, 100]} />
+                <Tooltip />
+                <Area 
+                  type="monotone" 
+                  dataKey="moisture" 
+                  stroke="#06b6d4"
+                  fill="#06b6d4"
+                  fillOpacity={0.3}
+                  name="Soil Moisture (%)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Activity className="h-5 w-5 text-purple-500" />
+              <span>Pore Water Pressure</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={250}>
+              <AreaChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="time" />
                 <YAxis />
                 <Tooltip />
-                <Bar 
-                  dataKey="moisture" 
-                  fill="#06b6d4"
-                  name="Moisture (%)"
+                <Area
+                  type="monotone"
+                  dataKey="pore_water_pressure"
+                  stroke="#8b5cf6"
+                  fill="#8b5cf6"
+                  fillOpacity={0.3}
+                  name="Pore Water Pressure (kPa)"
                 />
-              </BarChart>
+              </AreaChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
