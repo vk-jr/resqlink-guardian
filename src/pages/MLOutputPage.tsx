@@ -120,33 +120,33 @@ const MLOutputPage = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <span className="text-blue-600 font-bold">🌧️</span>
+                <div className="text-center p-4 border bg-card rounded-lg hover:bg-accent/10 transition-colors">
+                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="text-primary font-bold">🌧️</span>
                   </div>
                   <h4 className="font-semibold mb-1">Weather Data</h4>
                   <p className="text-xs text-muted-foreground">Rainfall, humidity, temperature from 150+ sensors</p>
                 </div>
                 
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <span className="text-green-600 font-bold">🌍</span>
+                <div className="text-center p-4 border bg-card rounded-lg hover:bg-accent/10 transition-colors">
+                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="text-primary font-bold">🌍</span>
                   </div>
                   <h4 className="font-semibold mb-1">Ground Sensors</h4>
                   <p className="text-xs text-muted-foreground">Vibration, soil moisture, slope stability</p>
                 </div>
                 
-                <div className="text-center p-4 bg-purple-50 rounded-lg">
-                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <span className="text-purple-600 font-bold">🛰️</span>
+                <div className="text-center p-4 border bg-card rounded-lg hover:bg-accent/10 transition-colors">
+                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="text-primary font-bold">🛰️</span>
                   </div>
                   <h4 className="font-semibold mb-1">Satellite Data</h4>
                   <p className="text-xs text-muted-foreground">Terrain analysis, vegetation, land use</p>
                 </div>
                 
-                <div className="text-center p-4 bg-orange-50 rounded-lg">
-                  <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <span className="text-orange-600 font-bold">📊</span>
+                <div className="text-center p-4 border bg-card rounded-lg hover:bg-accent/10 transition-colors">
+                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="text-primary font-bold">📊</span>
                   </div>
                   <h4 className="font-semibold mb-1">Historical Data</h4>
                   <p className="text-xs text-muted-foreground">Past events, seasonal patterns, geology</p>
