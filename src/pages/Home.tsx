@@ -61,33 +61,7 @@ const Home = () => {
               <LandslideDocuments />
             </div>
 
-            {/* Mission Statement */}
-            <Card className="shadow-card bg-gradient-to-r from-primary/5 to-accent/5">
-              <CardContent className="p-8">
-                <div className="text-center space-y-4">
-                  <h3 className="text-2xl font-bold">Our Mission</h3>
-                  <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                    ResQlink combines cutting-edge sensor technology, machine learning algorithms, 
-                    and real-time weather data to provide the earliest possible warning of landslide 
-                    risks, helping save lives and protect communities.
-                  </p>
-                  <div className="flex flex-wrap justify-center gap-4 pt-4">
-                    <Badge variant="outline" className="px-3 py-1">
-                      <Activity className="h-3 w-3 mr-1" />
-                      Real-time Monitoring
-                    </Badge>
-                    <Badge variant="outline" className="px-3 py-1">
-                      <Zap className="h-3 w-3 mr-1" />
-                      AI-Powered Predictions
-                    </Badge>
-                    <Badge variant="outline" className="px-3 py-1">
-                      <Shield className="h-3 w-3 mr-1" />
-                      Community Protection
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+
           </div>
         </div>
       </div>
