@@ -72,7 +72,9 @@ const SensorDashboard = () => {
           id,
           timestamp,
           soil_moisture,
-          pore_water_pressure
+          pore_water_pressure,
+          rainfall_24h_mm,
+          rainfall_3h_mm
         `)
         .order('timestamp', { ascending: false });
 
@@ -158,7 +160,9 @@ const SensorDashboard = () => {
         minute: '2-digit' 
       }),
       moisture: item.soil_moisture,
-      pore_water_pressure: item.pore_water_pressure
+      pore_water_pressure: item.pore_water_pressure,
+      rainfall_24h: item.rainfall_24h_mm,
+      rainfall_3h: item.rainfall_3h_mm
     }));
   };
 
@@ -206,8 +210,9 @@ const SensorDashboard = () => {
                 <Droplets className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Avg Rainfall</p>
-                <p className="text-2xl font-bold">{getAverageReading('rainfall').toFixed(1)}mm</p>
+                <p className="text-sm text-muted-foreground">24h Rainfall</p>
+                <p className="text-2xl font-bold">{getAverageReading('rainfall_24h_mm').toFixed(1)}mm</p>
+                <p className="text-xs text-muted-foreground mt-1">3h: {getAverageReading('rainfall_3h_mm').toFixed(1)}mm</p>
               </div>
             </div>
           </CardContent>
@@ -307,12 +312,12 @@ const SensorDashboard = () => {
         </CardHeader>
       </Card>
 
-      {/* Rainfall & Vibration Chart */}
+      {/* Rainfall Chart */}
       <Card className="shadow-card">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <TrendingUp className="h-5 w-5 text-primary" />
-            <span>Rainfall & Vibration Levels (24h)</span>
+            <span>Rainfall Measurements</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -320,21 +325,21 @@ const SensorDashboard = () => {
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="time" />
-              <YAxis />
+              <YAxis label={{ value: 'Rainfall (mm)', angle: -90, position: 'insideLeft' }} />
               <Tooltip />
               <Line 
                 type="monotone" 
-                dataKey="rainfall" 
+                dataKey="rainfall_24h" 
                 stroke="#3b82f6" 
                 strokeWidth={2}
-                name="Rainfall (mm)"
+                name="24h Rainfall (mm)"
               />
               <Line 
                 type="monotone" 
-                dataKey="vibration" 
-                stroke="#ef4444" 
+                dataKey="rainfall_3h" 
+                stroke="#22c55e" 
                 strokeWidth={2}
-                name="Vibration"
+                name="3h Rainfall (mm)"
               />
             </LineChart>
           </ResponsiveContainer>

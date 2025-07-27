@@ -37,7 +37,8 @@ interface SensorData {
   risk_probability: number;
   confidence: number;
   reasoning: string;
-  rainfall: number;
+  rainfall_24h_mm: number;
+  rainfall_3h_mm: number;
 }
 
 interface MLOutputCardProps {
@@ -210,6 +211,52 @@ const MLOutputCard = ({ className, showHeader = true }: MLOutputCardProps) => {
     ]
   };
 
+  const rainfallData = {
+    labels,
+    datasets: [
+      {
+        label: '24h Rainfall (mm)',
+        data: sensorData.map(data => data.rainfall_24h_mm),
+        borderColor: 'rgb(53, 162, 235)',
+        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+        yAxisID: 'y1',
+      },
+      {
+        label: '3h Rainfall (mm)',
+        data: sensorData.map(data => data.rainfall_3h_mm),
+        borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+        yAxisID: 'y1',
+      }
+    ]
+  };
+
+  const rainfallOptions = {
+    ...chartOptions,
+    scales: {
+      ...chartOptions.scales,
+      y1: {
+        type: 'linear' as const,
+        display: true,
+        position: 'left' as const,
+        title: {
+          display: true,
+          text: 'Rainfall (mm)'
+        },
+        grid: {
+          drawOnChartArea: false,
+        },
+      }
+    },
+    plugins: {
+      ...chartOptions.plugins,
+      title: {
+        display: true,
+        text: 'Rainfall Measurements'
+      }
+    }
+  };
+
   const getAlertColor = (landslide_risk: string) => {
     switch (landslide_risk.toLowerCase()) {
       case 'high':
@@ -269,6 +316,10 @@ const MLOutputCard = ({ className, showHeader = true }: MLOutputCardProps) => {
 
         {/* Graphs */}
         <div className="space-y-6">
+          <div className="h-[300px] p-4 border rounded-lg">
+            <h3 className="font-medium mb-4">Rainfall Measurements</h3>
+            <Line options={rainfallOptions} data={rainfallData} />
+          </div>
           <div className="h-[300px] p-4 border rounded-lg">
             <h3 className="font-medium mb-4">Predicted Soil Moisture</h3>
             <Line options={chartOptions} data={moistureData} />
