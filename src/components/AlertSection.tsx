@@ -21,7 +21,7 @@ const AlertSection = () => {
     setIsLoading(userType);
     
     try {
-      const response = await fetch('https://razyergg.app.n8n.cloud/webhook-test/call-trigger', {
+      const response = await fetch('https://razyergg.app.n8n.cloud/webhook/call-trigger', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

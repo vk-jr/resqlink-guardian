@@ -11,19 +11,31 @@ import {
   RefreshCw
 } from "lucide-react";
 
+const degToCompass = (num: number | undefined): string => {
+    if (num === undefined) return '';
+    const val = Math.floor((num / 22.5) + 0.5);
+    const arr = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+    return arr[(val % 16)];
+};
+
 interface WeatherData {
   main: {
     temp: number;
     humidity: number;
     pressure: number;
+    feels_like?: number;
   };
   weather: {
     main: string;
     description: string;
+    icon: string;
   }[];
   wind: {
     speed: number;
+    deg?: number;
+    gust?: number;
   };
+  visibility?: number;
   name: string;
 }
 
@@ -37,19 +49,21 @@ const WeatherMap = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [selectedLocation, setSelectedLocation] = useState<WeatherData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const apiKey = "36c51f6fbacf4b3498c31144252707";
+  const apiKey = "1635890035cbba097fd5c26c8ea672a1";  // Updated API key
   const { toast } = useToast();
 
-  // Major tech hubs and landslide-prone areas for monitoring
+  // Disaster-prone and significant weather monitoring locations worldwide
   const monitoredLocations = [
-    { lat: 10.8505, lng: 76.2711, name: "Western Ghats, Kerala" },  // Kerala
-    { lat: 30.7333, lng: 79.0667, name: "Uttarakhand" },           // Uttarakhand
-    { lat: 27.3389, lng: 88.6065, name: "Sikkim" },                // Sikkim
-    { lat: 34.0837, lng: 74.7973, name: "Kashmir" },               // Kashmir
-    { lat: 15.3173, lng: 74.0000, name: "Goa" },                   // Goa
-    { lat: 19.0760, lng: 72.8777, name: "Mumbai" },                // Mumbai
-    { lat: 22.5726, lng: 88.3639, name: "Kolkata" },               // Kolkata
-    { lat: 13.0827, lng: 80.2707, name: "Chennai" },               // Chennai
+    { lat: 10.8505, lng: 76.2711, name: "Kerala, India" },        // Landslide prone
+    { lat: -33.8688, lng: 151.2093, name: "Sydney" },             // Bushfire prone
+    { lat: 35.6762, lng: 139.6503, name: "Tokyo" },               // Earthquake prone
+    { lat: 25.7617, lng: -80.1918, name: "Miami" },               // Hurricane prone
+    { lat: -6.2088, lng: 106.8456, name: "Jakarta" },             // Flood prone
+    { lat: 19.4326, lng: -99.1332, name: "Mexico City" },         // Earthquake zone
+    { lat: 14.5995, lng: 120.9842, name: "Manila" },              // Typhoon prone
+    { lat: -22.9068, lng: -43.1729, name: "Rio" },                // Landslide risk
+    { lat: 31.2304, lng: 121.4737, name: "Shanghai" },            // Flood prone
+    { lat: 37.7749, lng: -122.4194, name: "San Francisco" }       // Seismic zone
   ];
 
   useEffect(() => {
@@ -59,13 +73,25 @@ const WeatherMap = () => {
       .leaflet-container { z-index: 1; }
       .leaflet-popup { z-index: 2; }
       .weather-widget {
-        padding: 8px;
-        border-radius: 6px;
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(0, 0, 0, 0.1);
-        font-size: 12px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 6px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        font-size: 11px;
+        box-shadow: 
+          0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06),
+          0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+        transform: translateY(-2px);
+        transition: all 0.2s ease;
+      }
+      .weather-widget:hover {
+        transform: translateY(-4px);
+        box-shadow: 
+          0 8px 12px -1px rgba(0, 0, 0, 0.15),
+          0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 0 0 1px rgba(255, 255, 255, 0.5) inset;
       }
     `;
     document.head.appendChild(style);
@@ -87,7 +113,7 @@ const WeatherMap = () => {
           zoomControl: true,
           scrollWheelZoom: true,
           doubleClickZoom: true
-        }).setView([20.5937, 78.9629], 4);  // Centered on India
+        }).setView([10.8505, 76.2711], 6);  // Centered on South India (Kerala)
 
         window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '© OpenStreetMap contributors'
@@ -133,12 +159,15 @@ const WeatherMap = () => {
             })
             .setLatLng([location.lat, location.lng])
             .setContent(`
-              <div class="text-xs">
-                <div class="font-semibold">${location.name}</div>
-                <div class="mt-1">${data.weather[0].main}</div>
-                <div class="flex justify-between items-center mt-1">
-                  <span>${data.main.temp.toFixed(1)}°C</span>
-                  <span>${data.main.humidity}%</span>
+              <div class="text-[10px] leading-tight">
+                <div class="font-bold text-[11px] mb-0.5 text-blue-600">${location.name}</div>
+                <div class="flex items-center gap-1.5">
+                  <span class="font-bold text-[13px]">${data.main.temp.toFixed(1)}°C</span>
+                  <span class="text-gray-600 text-[10px]">${data.weather[0].main}</span>
+                </div>
+                <div class="flex items-center justify-between text-[9px] text-gray-600 mt-0.5">
+                  <span>💧${data.main.humidity}%</span>
+                  <span>💨${data.wind.speed}m/s</span>
                 </div>
               </div>
             `)
@@ -157,21 +186,35 @@ const WeatherMap = () => {
             const response = await fetch(
               `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${apiKey}&units=metric`
             );
-            if (!response.ok) throw new Error('Weather API request failed');
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.message || 'Weather API request failed');
+            }
             const data = await response.json();
             setSelectedLocation(data);
+            console.log('Weather data fetched:', data);
 
             // Create a popup at the clicked location
-            window.L.popup()
+            window.L.popup({ closeButton: true, autoClose: true })
               .setLatLng([lat, lng])
               .setContent(`
-                <div class="p-2">
-                  <div class="font-semibold">${data.name || 'Selected Location'}</div>
-                  <div class="text-sm mt-1">${data.weather[0].description}</div>
-                  <div class="flex justify-between items-center mt-1 text-sm">
-                    <span>${data.main.temp.toFixed(1)}°C</span>
-                    <span>${data.wind.speed} m/s</span>
-                  </div>
+                <div class="p-3 bg-white/90 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50" style="width: 220px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 13px;">
+                    <div class="flex items-center justify-between">
+                        <span class="text-4xl font-light text-gray-800">${data.main.temp.toFixed(0)}°C</span>
+                        <img src="http://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png" alt="${data.weather[0].description}" class="w-12 h-12 -mr-2">
+                    </div>
+                    <div class="text-left -mt-2">
+                        <div class="font-semibold text-gray-700 text-md">${data.weather[0].main}</div>
+                        <div class="text-sm text-gray-500">${data.name}</div>
+                    </div>
+                    <div class="border-t border-gray-200/80 my-2"></div>
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                        <div class="flex justify-between text-gray-600"><span>Feels like</span> <span class="font-semibold text-gray-800">${data.main.feels_like?.toFixed(0)}°C</span></div>
+                        <div class="flex justify-between text-gray-600"><span>Humidity</span> <span class="font-semibold text-gray-800">${data.main.humidity}%</span></div>
+                        <div class="flex justify-between text-gray-600"><span>Wind</span> <span class="font-semibold text-gray-800">${(data.wind.speed * 3.6).toFixed(0)} km/h ${degToCompass(data.wind.deg)}</span></div>
+                        <div class="flex justify-between text-gray-600"><span>Visibility</span> <span class="font-semibold text-gray-800">${data.visibility ? (data.visibility / 1000).toFixed(0) : 'N/A'} km</span></div>
+                        <div class="flex justify-between text-gray-600"><span>Pressure</span> <span class="font-semibold text-gray-800">${data.main.pressure} mb</span></div>
+                    </div>
                 </div>
               `)
               .openOn(map);
@@ -180,11 +223,11 @@ const WeatherMap = () => {
               title: "Location Selected",
               description: `Weather data loaded for ${data.name || 'selected location'}`,
             });
-          } catch (error) {
+          } catch (error: any) {
             console.error('Error fetching weather data:', error);
             toast({
               title: "Weather Data Error",
-              description: "Unable to fetch weather data for this location.",
+              description: error.message || "Unable to fetch weather data for this location.",
               variant: "destructive",
             });
           } finally {
@@ -243,45 +286,64 @@ const WeatherMap = () => {
             </div>
           </div>
           
-          {selectedLocation && (
+          {selectedLocation && selectedLocation.weather && selectedLocation.weather[0] && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-              <div className="p-4 bg-muted rounded-lg">
-                <div className="flex items-center space-x-2">
-                  <Cloud className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium">Weather</span>
+              <div className="p-6 bg-muted rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center space-x-2 mb-3">
+                  <Cloud className="h-5 w-5 text-primary" />
+                  <span className="text-sm font-medium">Weather Conditions</span>
                 </div>
-                <p className="mt-1 text-xl font-semibold">
+                <p className="mt-1 text-2xl font-bold text-primary">
                   {selectedLocation.weather[0].main}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground mt-1">
                   {selectedLocation.weather[0].description}
                 </p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Feels like: {selectedLocation.main.feels_like?.toFixed(1)}°C
+                </p>
               </div>
 
-              <div className="p-4 bg-muted rounded-lg">
-                <div className="flex items-center space-x-2">
-                  <Thermometer className="h-4 w-4 text-orange-500" />
-                  <span className="text-sm font-medium">Temperature</span>
+              <div className="p-6 bg-muted rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center space-x-2 mb-3">
+                  <Thermometer className="h-5 w-5 text-orange-500" />
+                  <span className="text-sm font-medium">Temperature & Humidity</span>
                 </div>
-                <p className="mt-1 text-xl font-semibold">
+                <p className="mt-1 text-2xl font-bold text-orange-500">
                   {selectedLocation.main.temp.toFixed(1)}°C
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  Humidity: {selectedLocation.main.humidity}%
-                </p>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  <p className="text-sm text-muted-foreground">
+                    <span className="font-medium">💧 Humidity:</span><br/>
+                    {selectedLocation.main.humidity}%
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    <span className="font-medium">📊 Pressure:</span><br/>
+                    {selectedLocation.main.pressure} hPa
+                  </p>
+                </div>
               </div>
 
-              <div className="p-4 bg-muted rounded-lg">
-                <div className="flex items-center space-x-2">
-                  <Wind className="h-4 w-4 text-green-500" />
-                  <span className="text-sm font-medium">Wind</span>
+              <div className="p-6 bg-muted rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center space-x-2 mb-3">
+                  <Wind className="h-5 w-5 text-green-500" />
+                  <span className="text-sm font-medium">Wind Information</span>
                 </div>
-                <p className="mt-1 text-xl font-semibold">
+                <p className="mt-1 text-2xl font-bold text-green-500">
                   {selectedLocation.wind.speed} m/s
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  Pressure: {selectedLocation.main.pressure} hPa
-                </p>
+                <div className="mt-2">
+                  <p className="text-sm text-muted-foreground">
+                    <span className="font-medium">Wind Direction:</span><br/>
+                    {selectedLocation.wind.deg ? `${selectedLocation.wind.deg}°` : 'N/A'}
+                  </p>
+                  {selectedLocation.wind.gust && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      <span className="font-medium">Gusts:</span><br/>
+                      {selectedLocation.wind.gust} m/s
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           )}
