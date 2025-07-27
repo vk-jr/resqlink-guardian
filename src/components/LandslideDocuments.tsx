@@ -35,7 +35,6 @@ const images: ImageData[] = [
 
 const LandslideDocuments = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const nextImage = useCallback(() => {
@@ -44,10 +43,6 @@ const LandslideDocuments = () => {
 
   const previousImage = () => {
     setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
-  };
-
-  const toggleAutoplay = () => {
-    setIsPlaying(!isPlaying);
   };
 
   const toggleFullscreen = () => {
@@ -64,16 +59,9 @@ const LandslideDocuments = () => {
   };
 
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-    if (isPlaying) {
-      intervalId = setInterval(nextImage, 3000); // Faster transition for better visual flow
-    }
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [isPlaying, nextImage]);
+    const intervalId = setInterval(nextImage, 5000); // 5 second delay for autoplay
+    return () => clearInterval(intervalId);
+  }, [nextImage]);
 
   return (
     <Card className="shadow-xl">
@@ -81,18 +69,6 @@ const LandslideDocuments = () => {
         <div className="text-2xl font-bold mb-6 flex items-center justify-between">
           <span>Landslide Documents</span>
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={toggleAutoplay}
-              className="h-8 w-8"
-            >
-              {isPlaying ? (
-                <Pause className="h-4 w-4" />
-              ) : (
-                <Play className="h-4 w-4" />
-              )}
-            </Button>
             <Button
               variant="outline"
               size="icon"
@@ -114,17 +90,15 @@ const LandslideDocuments = () => {
                  style={{ transform: `translateX(-${(currentIndex * 33.333)}%)` }}>
               {[...images, ...images.slice(0, 2)].map((image, index) => (
                 <div key={index} className="w-1/3 flex-shrink-0 px-2">
-                  <div className="border-2 border-primary/20 rounded-lg shadow-xl overflow-hidden">
-                    <div className="aspect-[4/3] relative">
-                      <img
-                        src={image.src}
-                        alt={image.title}
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="p-2 bg-background/95">
-                      <p className="text-sm font-medium text-center truncate">{image.title}</p>
-                    </div>
+                  <div className="aspect-[4/3] relative">
+                    <img
+                      src={image.src}
+                      alt={image.title}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <div className="mt-2">
+                    <p className="text-sm font-medium text-center">{image.title}</p>
                   </div>
                 </div>
               ))}
