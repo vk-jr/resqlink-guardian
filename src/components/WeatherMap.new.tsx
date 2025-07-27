@@ -1,4 +1,3 @@
-// @ts-ignore
 import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +6,7 @@ import {
   Globe, 
   Cloud, 
   Thermometer, 
+  Droplets,
   Wind,
   RefreshCw
 } from "lucide-react";
@@ -27,12 +27,6 @@ interface WeatherData {
   name: string;
 }
 
-declare global {
-  interface Window {
-    L: any;
-  }
-}
-
 const WeatherMap = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [selectedLocation, setSelectedLocation] = useState<WeatherData | null>(null);
@@ -40,36 +34,8 @@ const WeatherMap = () => {
   const apiKey = "36c51f6fbacf4b3498c31144252707";
   const { toast } = useToast();
 
-  // Major tech hubs and landslide-prone areas for monitoring
-  const monitoredLocations = [
-    { lat: 10.8505, lng: 76.2711, name: "Western Ghats, Kerala" },  // Kerala
-    { lat: 30.7333, lng: 79.0667, name: "Uttarakhand" },           // Uttarakhand
-    { lat: 27.3389, lng: 88.6065, name: "Sikkim" },                // Sikkim
-    { lat: 34.0837, lng: 74.7973, name: "Kashmir" },               // Kashmir
-    { lat: 15.3173, lng: 74.0000, name: "Goa" },                   // Goa
-    { lat: 19.0760, lng: 72.8777, name: "Mumbai" },                // Mumbai
-    { lat: 22.5726, lng: 88.3639, name: "Kolkata" },               // Kolkata
-    { lat: 13.0827, lng: 80.2707, name: "Chennai" },               // Chennai
-  ];
-
   useEffect(() => {
-    // Load Leaflet CSS with z-index fixes
-    const style = document.createElement('style');
-    style.textContent = `
-      .leaflet-container { z-index: 1; }
-      .leaflet-popup { z-index: 2; }
-      .weather-widget {
-        padding: 8px;
-        border-radius: 6px;
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(0, 0, 0, 0.1);
-        font-size: 12px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-    `;
-    document.head.appendChild(style);
-
+    // Load Leaflet CSS
     const linkEl = document.createElement('link');
     linkEl.rel = 'stylesheet';
     linkEl.href = 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.css';
@@ -83,72 +49,18 @@ const WeatherMap = () => {
 
     script.onload = () => {
       if (mapRef.current && window.L) {
-        const map = window.L.map(mapRef.current, {
-          zoomControl: true,
-          scrollWheelZoom: true,
-          doubleClickZoom: true
-        }).setView([20.5937, 78.9629], 4);  // Centered on India
+        const map = L.map(mapRef.current).setView([20, 0], 2);
 
-        window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        // Add weather overlay layers
-        const tempLayer = window.L.tileLayer(`https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${apiKey}`, {
-          opacity: 0.3
+        // Add weather overlay
+        L.tileLayer(`https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${apiKey}`, {
+          opacity: 0.5
         }).addTo(map);
 
-        const precipitationLayer = window.L.tileLayer(`https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${apiKey}`, {
-          opacity: 0.3
-        });
-
-        // Create layer control
-        const baseMaps = {
-          "OpenStreetMap": window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'),
-        };
-        
-        const overlayMaps = {
-          "Temperature": tempLayer,
-          "Precipitation": precipitationLayer
-        };
-
-        window.L.control.layers(baseMaps, overlayMaps).addTo(map);
-
-        // Add weather widgets for monitored locations
-        monitoredLocations.forEach(async (location) => {
-          try {
-            const response = await fetch(
-              `https://api.openweathermap.org/data/2.5/weather?lat=${location.lat}&lon=${location.lng}&appid=${apiKey}&units=metric`
-            );
-            if (!response.ok) throw new Error('Weather API request failed');
-            const data = await response.json();
-            
-            const widget = window.L.popup({
-              closeButton: false,
-              autoClose: false,
-              closeOnEscapeKey: false,
-              closeOnClick: false,
-              className: 'weather-widget',
-              maxWidth: 200
-            })
-            .setLatLng([location.lat, location.lng])
-            .setContent(`
-              <div class="text-xs">
-                <div class="font-semibold">${location.name}</div>
-                <div class="mt-1">${data.weather[0].main}</div>
-                <div class="flex justify-between items-center mt-1">
-                  <span>${data.main.temp.toFixed(1)}°C</span>
-                  <span>${data.main.humidity}%</span>
-                </div>
-              </div>
-            `)
-            .addTo(map);
-          } catch (error) {
-            console.error(`Error fetching weather for ${location.name}:`, error);
-          }
-        });
-
-        // Handle map click for detailed weather
+        // Handle map click
         map.on('click', async (e: any) => {
           const { lat, lng } = e.latlng;
           setIsLoading(true);
@@ -160,22 +72,6 @@ const WeatherMap = () => {
             if (!response.ok) throw new Error('Weather API request failed');
             const data = await response.json();
             setSelectedLocation(data);
-
-            // Create a popup at the clicked location
-            window.L.popup()
-              .setLatLng([lat, lng])
-              .setContent(`
-                <div class="p-2">
-                  <div class="font-semibold">${data.name || 'Selected Location'}</div>
-                  <div class="text-sm mt-1">${data.weather[0].description}</div>
-                  <div class="flex justify-between items-center mt-1 text-sm">
-                    <span>${data.main.temp.toFixed(1)}°C</span>
-                    <span>${data.wind.speed} m/s</span>
-                  </div>
-                </div>
-              `)
-              .openOn(map);
-
             toast({
               title: "Location Selected",
               description: `Weather data loaded for ${data.name || 'selected location'}`,
@@ -230,18 +126,9 @@ const WeatherMap = () => {
           
           <div 
             ref={mapRef} 
-            className="aspect-[16/9] rounded-lg overflow-hidden border relative"
-            style={{ minHeight: "400px", zIndex: 0 }}
-          >
-            <div className="absolute top-4 right-4 z-10 space-y-2">
-              <Badge variant="outline" className="bg-background/80 backdrop-blur-sm">
-                🔍 Zoom in/out for details
-              </Badge>
-              <Badge variant="outline" className="bg-background/80 backdrop-blur-sm">
-                ⚡ Live weather updates
-              </Badge>
-            </div>
-          </div>
+            className="aspect-[16/9] rounded-lg overflow-hidden border"
+            style={{ minHeight: "400px" }}
+          />
           
           {selectedLocation && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
