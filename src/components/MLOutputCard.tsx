@@ -44,9 +44,10 @@ interface SensorData {
 interface MLOutputCardProps {
   className?: string;
   showHeader?: boolean;
+  showGraphs?: boolean;
 }
 
-const MLOutputCard = ({ className, showHeader = true }: MLOutputCardProps) => {
+const MLOutputCard = ({ className, showHeader = true, showGraphs = true }: MLOutputCardProps) => {
   const [sensorData, setSensorData] = useState<SensorData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -315,24 +316,26 @@ const MLOutputCard = ({ className, showHeader = true }: MLOutputCardProps) => {
         </div>
 
         {/* Graphs */}
-        <div className="space-y-6">
-          <div className="h-[300px] p-4 border rounded-lg">
-            <h3 className="font-medium mb-4">Rainfall Measurements</h3>
-            <Line options={rainfallOptions} data={rainfallData} />
+        {showGraphs && (
+          <div className="space-y-6">
+            <div className="h-[300px] p-4 border rounded-lg">
+              <h3 className="font-medium mb-4">Rainfall Measurements</h3>
+              <Line options={rainfallOptions} data={rainfallData} />
+            </div>
+            <div className="h-[300px] p-4 border rounded-lg">
+              <h3 className="font-medium mb-4">Predicted Soil Moisture</h3>
+              <Line options={chartOptions} data={moistureData} />
+            </div>
+            <div className="h-[300px] p-4 border rounded-lg">
+              <h3 className="font-medium mb-4">Predicted Pore Pressure</h3>
+              <Line options={chartOptions} data={pressureData} />
+            </div>
+            <div className="h-[300px] p-4 border rounded-lg">
+              <h3 className="font-medium mb-4">Risk Probability Trend</h3>
+              <Line options={chartOptions} data={riskData} />
+            </div>
           </div>
-          <div className="h-[300px] p-4 border rounded-lg">
-            <h3 className="font-medium mb-4">Predicted Soil Moisture</h3>
-            <Line options={chartOptions} data={moistureData} />
-          </div>
-          <div className="h-[300px] p-4 border rounded-lg">
-            <h3 className="font-medium mb-4">Predicted Pore Pressure</h3>
-            <Line options={chartOptions} data={pressureData} />
-          </div>
-          <div className="h-[300px] p-4 border rounded-lg">
-            <h3 className="font-medium mb-4">Risk Probability Trend</h3>
-            <Line options={chartOptions} data={riskData} />
-          </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
