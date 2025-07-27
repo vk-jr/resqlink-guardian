@@ -13,17 +13,16 @@ export const supabase = createClient(supabaseUrl, supabaseKey);
 export interface SensorData {
   id: number;
   timestamp: string;
-  soil_moisture: number;
-  pore_water_pressure: number;
-  distance_cm: number;
-  vibration_detected: boolean;
-  vibration_intensity: number;
-  danger: boolean;
+  notification: string;
+  alert: string;
+  landslide_risk: string;
+  predicted_soil_moisture: number;
+  predicted_pore_pressure: number;
+  risk_probability: number;
   confidence: number;
   reasoning: string;
-  notification: string;
-  alert: boolean;
-  rainfall: number;
+  rainfall_24h_mm: number;
+  rainfall_3h_mm: number;
 }
 
 // ML Prediction types

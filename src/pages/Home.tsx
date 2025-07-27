@@ -17,64 +17,19 @@ const Home = () => {
     <Layout>
       <div className="space-y-8">
         {/* Hero Section */}
-        <div className="relative overflow-hidden">
-          <div className="max-w-7xl mx-auto py-8">
-            <div className="text-center space-y-6 animate-fade-in">
-              <h1 className="text-4xl md:text-6xl font-bold">
-                <span className="text-primary">
-                  Landslide Early Warning
-                </span>
-                <br />
+        <div className="relative flex items-center justify-center min-h-[20vh] bg-background/95">
+          <div className="max-w-4xl mx-auto py-6">
+            <div className="flex flex-col items-center text-center px-4 space-y-3">
+              <h1 className="text-2xl md:text-3xl font-bold">
+                <span className="text-primary">Landslide Early Warning</span>
+                {" "}
                 <span className="text-foreground">System</span>
               </h1>
               
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
                 Advanced AI-powered monitoring system providing real-time landslide risk assessment 
                 and emergency alerts to protect communities worldwide.
               </p>
-
-              {/* Stats Grid */}
-              <div className="grid grid-cols-4 gap-2 max-w-3xl mx-auto mt-8">
-                <Card className="shadow-card">
-                  <CardContent className="p-2 text-center">
-                    <div className="p-1 bg-primary/10 rounded-lg w-fit mx-auto mb-1">
-                      <Shield className="h-4 w-4 text-primary" />
-                    </div>
-                    <div className="text-xl font-bold text-primary">24/7</div>
-                    <div className="text-xs text-muted-foreground">Monitoring</div>
-                  </CardContent>
-                </Card>
-                
-                <Card className="shadow-card">
-                  <CardContent className="p-2 text-center">
-                    <div className="p-1 bg-success/10 rounded-lg w-fit mx-auto mb-1">
-                      <Zap className="h-4 w-4 text-success" />
-                    </div>
-                    <div className="text-xl font-bold text-success">87%</div>
-                    <div className="text-xs text-muted-foreground">Accuracy</div>
-                  </CardContent>
-                </Card>
-                
-                <Card className="shadow-card">
-                  <CardContent className="p-2 text-center">
-                    <div className="p-1 bg-accent/10 rounded-lg w-fit mx-auto mb-1">
-                      <Globe className="h-4 w-4 text-accent" />
-                    </div>
-                    <div className="text-xl font-bold text-accent">150+</div>
-                    <div className="text-xs text-muted-foreground">Sensors</div>
-                  </CardContent>
-                </Card>
-                
-                <Card className="shadow-card">
-                  <CardContent className="p-2 text-center">
-                    <div className="p-1 bg-warning/10 rounded-lg w-fit mx-auto mb-1">
-                      <TrendingUp className="h-4 w-4 text-warning" />
-                    </div>
-                    <div className="text-xl font-bold text-warning">12k+</div>
-                    <div className="text-xs text-muted-foreground">Protected</div>
-                  </CardContent>
-                </Card>
-              </div>
             </div>
           </div>
         </div>
@@ -88,7 +43,7 @@ const Home = () => {
                 <MapPin className="h-6 w-6 text-primary" />
                 <span>Current Risk Assessment</span>
               </h2>
-              <MLOutputCard showHeader={false} />
+              <MLOutputCard showHeader={false} showGraphs={false} />
             </div>
 
             {/* Emergency Alert Section */}
