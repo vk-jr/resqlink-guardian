@@ -2,6 +2,13 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { 
   LineChart, 
   Line, 
@@ -31,6 +38,7 @@ const SensorDashboard = () => {
   const [sensorData, setSensorData] = useState<SensorData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [dataRange, setDataRange] = useState<'10' | '100' | 'all'>('10');
   const { toast } = useToast();
 
   // Generate realistic sensor data for demo
@@ -58,7 +66,7 @@ const SensorDashboard = () => {
     setIsLoading(true);
     try {
       // Get the table information first to see available columns
-      const { data, error } = await supabase
+      let query = supabase
         .from('sensor_data')
         .select(`
           id,
@@ -66,7 +74,14 @@ const SensorDashboard = () => {
           soil_moisture,
           pore_water_pressure
         `)
-        .order('timestamp', { ascending: true });
+        .order('timestamp', { ascending: false });
+
+      // Apply limit based on selected range
+      if (dataRange !== 'all') {
+        query = query.limit(parseInt(dataRange));
+      }
+
+      const { data, error } = await query;
 
       // Log the first row to see the structure
       if (data && data.length > 0) {
@@ -82,7 +97,8 @@ const SensorDashboard = () => {
       }
 
       if (data && data.length > 0) {
-        setSensorData(data);
+        // Reverse the data to show oldest to newest
+        setSensorData(data.reverse());
         setLastUpdate(new Date());
         
         toast({
@@ -264,10 +280,28 @@ const SensorDashboard = () => {
               <p className="text-sm text-muted-foreground">
                 Last updated: {lastUpdate.toLocaleTimeString()}
               </p>
-              <Button onClick={fetchSensorData} variant="outline" size="sm">
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
-              </Button>
+              <div className="flex items-center space-x-2">
+                <Select
+                  value={dataRange}
+                  onValueChange={(value: '10' | '100' | 'all') => {
+                    setDataRange(value);
+                    fetchSensorData();
+                  }}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="10">Last 10 Records</SelectItem>
+                    <SelectItem value="100">Last 100 Records</SelectItem>
+                    <SelectItem value="all">All Records</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button onClick={fetchSensorData} variant="outline" size="sm">
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Refresh
+                </Button>
+              </div>
             </div>
           </CardTitle>
         </CardHeader>
