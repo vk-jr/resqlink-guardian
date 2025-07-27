@@ -34,44 +34,44 @@ const Home = () => {
               </p>
 
               {/* Stats Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mt-12">
+              <div className="grid grid-cols-4 gap-2 max-w-3xl mx-auto mt-8">
                 <Card className="shadow-card">
-                  <CardContent className="p-4 text-center">
-                    <div className="p-2 bg-primary/10 rounded-lg w-fit mx-auto mb-2">
-                      <Shield className="h-6 w-6 text-primary" />
+                  <CardContent className="p-2 text-center">
+                    <div className="p-1 bg-primary/10 rounded-lg w-fit mx-auto mb-1">
+                      <Shield className="h-4 w-4 text-primary" />
                     </div>
-                    <div className="text-2xl font-bold text-primary">24/7</div>
-                    <div className="text-sm text-muted-foreground">Monitoring</div>
+                    <div className="text-xl font-bold text-primary">24/7</div>
+                    <div className="text-xs text-muted-foreground">Monitoring</div>
                   </CardContent>
                 </Card>
                 
                 <Card className="shadow-card">
-                  <CardContent className="p-4 text-center">
-                    <div className="p-2 bg-success/10 rounded-lg w-fit mx-auto mb-2">
-                      <Zap className="h-6 w-6 text-success" />
+                  <CardContent className="p-2 text-center">
+                    <div className="p-1 bg-success/10 rounded-lg w-fit mx-auto mb-1">
+                      <Zap className="h-4 w-4 text-success" />
                     </div>
-                    <div className="text-2xl font-bold text-success">87%</div>
-                    <div className="text-sm text-muted-foreground">Accuracy</div>
+                    <div className="text-xl font-bold text-success">87%</div>
+                    <div className="text-xs text-muted-foreground">Accuracy</div>
                   </CardContent>
                 </Card>
                 
                 <Card className="shadow-card">
-                  <CardContent className="p-4 text-center">
-                    <div className="p-2 bg-accent/10 rounded-lg w-fit mx-auto mb-2">
-                      <Globe className="h-6 w-6 text-accent" />
+                  <CardContent className="p-2 text-center">
+                    <div className="p-1 bg-accent/10 rounded-lg w-fit mx-auto mb-1">
+                      <Globe className="h-4 w-4 text-accent" />
                     </div>
-                    <div className="text-2xl font-bold text-accent">150+</div>
-                    <div className="text-sm text-muted-foreground">Sensors</div>
+                    <div className="text-xl font-bold text-accent">150+</div>
+                    <div className="text-xs text-muted-foreground">Sensors</div>
                   </CardContent>
                 </Card>
                 
                 <Card className="shadow-card">
-                  <CardContent className="p-4 text-center">
-                    <div className="p-2 bg-warning/10 rounded-lg w-fit mx-auto mb-2">
-                      <TrendingUp className="h-6 w-6 text-warning" />
+                  <CardContent className="p-2 text-center">
+                    <div className="p-1 bg-warning/10 rounded-lg w-fit mx-auto mb-1">
+                      <TrendingUp className="h-4 w-4 text-warning" />
                     </div>
-                    <div className="text-2xl font-bold text-warning">12k+</div>
-                    <div className="text-sm text-muted-foreground">Protected</div>
+                    <div className="text-xl font-bold text-warning">12k+</div>
+                    <div className="text-xs text-muted-foreground">Protected</div>
                   </CardContent>
                 </Card>
               </div>
