@@ -12,29 +12,24 @@ import {
 interface ImageData {
   src: string;
   title: string;
-  description: string;
 }
 
 const images: ImageData[] = [
   {
     src: "/Landslide_inventory.png",
-    title: "Landslide Inventory",
-    description: "Placeholder description for Landslide Inventory. This will be updated with actual content."
+    title: "Landslide Inventory"
   },
   {
     src: "/Landslide_Susceptibility.jpg",
-    title: "Landslide Susceptibility",
-    description: "Placeholder description for Landslide Susceptibility. This will be updated with actual content."
+    title: "Landslide Susceptibility"
   },
   {
     src: "/Risk.png",
-    title: "Risk Assessment",
-    description: "Placeholder description for Risk Assessment. This will be updated with actual content."
+    title: "Risk Assessment"
   },
   {
     src: "/kerala.png",
-    title: "Kerala Landslide Map",
-    description: "Placeholder description for Kerala landslide map. This will be updated with actual content."
+    title: "Kerala Landslide Map"
   }
 ];
 
@@ -71,7 +66,7 @@ const LandslideDocuments = () => {
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
     if (isPlaying) {
-      intervalId = setInterval(nextImage, 5000);
+      intervalId = setInterval(nextImage, 3000); // Faster transition for better visual flow
     }
     return () => {
       if (intervalId) {
@@ -109,18 +104,30 @@ const LandslideDocuments = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="w-full overflow-hidden">
           {/* Image Section */}
           <div 
             id="image-container" 
             className={`relative ${isFullscreen ? 'fixed inset-0 z-50 bg-background' : ''}`}
           >
-            <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
-              <img
-                src={images[currentIndex].src}
-                alt={images[currentIndex].title}
-                className="w-full h-full object-contain"
-              />
+            <div className="flex transition-transform duration-500 ease-in-out" 
+                 style={{ transform: `translateX(-${(currentIndex * 33.333)}%)` }}>
+              {[...images, ...images.slice(0, 2)].map((image, index) => (
+                <div key={index} className="w-1/3 flex-shrink-0 px-2">
+                  <div className="border-2 border-primary/20 rounded-lg shadow-xl overflow-hidden">
+                    <div className="aspect-[4/3] relative">
+                      <img
+                        src={image.src}
+                        alt={image.title}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-2 bg-background/95">
+                      <p className="text-sm font-medium text-center truncate">{image.title}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
               
               {/* Navigation Buttons */}
               <div className="absolute inset-0 flex items-center justify-between p-4">
@@ -159,15 +166,7 @@ const LandslideDocuments = () => {
             </div>
           </div>
 
-          {/* Description Section */}
-          <div className="space-y-4">
-            <h3 className="text-xl font-semibold">
-              {images[currentIndex].title}
-            </h3>
-            <p className="text-muted-foreground">
-              {images[currentIndex].description}
-            </p>
-          </div>
+
         </div>
       </CardContent>
     </Card>
