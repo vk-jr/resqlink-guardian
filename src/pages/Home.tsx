@@ -11,6 +11,7 @@ import {
   TrendingUp,
   MapPin
 } from "lucide-react";
+import LandslideDocuments from "@/components/LandslideDocuments";
 
 const Home = () => {
   return (
@@ -53,6 +54,11 @@ const Home = () => {
                 <span>Emergency Response</span>
               </h2>
               <AlertSection />
+            </div>
+
+            {/* Landslide Documents Section */}
+            <div className="space-y-4">
+              <LandslideDocuments />
             </div>
 
             {/* Mission Statement */}
