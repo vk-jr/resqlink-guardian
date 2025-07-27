@@ -221,12 +221,12 @@ const SensorDashboard = () => {
         <Card className="shadow-card">
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <Zap className="h-5 w-5 text-orange-600" />
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Droplets className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Avg Vibration</p>
-                <p className="text-2xl font-bold">{getAverageReading('vibration').toFixed(1)}</p>
+                <p className="text-sm text-muted-foreground">Soil Moisture</p>
+                <p className="text-2xl font-bold">{getAverageReading('soil_moisture').toFixed(1)}</p>
               </div>
             </div>
           </CardContent>
@@ -236,11 +236,11 @@ const SensorDashboard = () => {
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
               <div className="p-2 bg-green-100 rounded-lg">
-                <Thermometer className="h-5 w-5 text-green-600" />
+                <TrendingUp className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Avg Temperature</p>
-                <p className="text-2xl font-bold">{getAverageReading('temperature').toFixed(1)}°C</p>
+                <p className="text-sm text-muted-foreground">Pore Water Pressure</p>
+                <p className="text-2xl font-bold">{getAverageReading('pore_water_pressure').toFixed(1)}</p>
               </div>
             </div>
           </CardContent>

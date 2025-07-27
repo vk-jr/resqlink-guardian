@@ -12,6 +12,7 @@ import {
   MapPin
 } from "lucide-react";
 import LandslideDocuments from "@/components/LandslideDocuments";
+import EmergencySection from "@/components/EmergencySection";
 
 const Home = () => {
   return (
@@ -61,7 +62,14 @@ const Home = () => {
               <LandslideDocuments />
             </div>
 
-
+            {/* Emergency Section */}
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold flex items-center space-x-2">
+                <Shield className="h-6 w-6 text-destructive" />
+                <span>Emergency Center</span>
+              </h2>
+              <EmergencySection />
+            </div>
           </div>
         </div>
       </div>

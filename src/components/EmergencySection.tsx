@@ -1,0 +1,96 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Globe } from "lucide-react";
+
+const EmergencySection = () => {
+  // Mock emergency messages for demonstration
+  const emergencyMessages = [
+    {
+      id: 1,
+      message: "⚠️ High risk of landslide detected in Wayanad region",
+      timestamp: "10:30 AM",
+      priority: "high"
+    },
+    {
+      id: 2,
+      message: "🚨 Emergency response team dispatched to affected area",
+      timestamp: "10:35 AM",
+      priority: "high"
+    },
+    {
+      id: 3,
+      message: "ℹ️ Local authorities have been notified",
+      timestamp: "10:40 AM",
+      priority: "medium"
+    },
+    {
+      id: 4,
+      message: "📢 Evacuation procedures initiated in high-risk zones",
+      timestamp: "10:45 AM",
+      priority: "high"
+    },
+  ];
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* World Map Section */}
+      <Card className="shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Globe className="h-5 w-5 text-primary" />
+            <span>Global Emergency Map</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="aspect-[16/9] bg-muted rounded-lg overflow-hidden">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d15735.325582281553!2d76.08340955!3d10.7864805!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sin!4v1627366482244!5m2!1sen!2sin"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen={true}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Emergency Chat Section */}
+      <Card className="shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2 text-destructive">
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-destructive"></span>
+            </span>
+            <span>Emergency Alerts</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ScrollArea className="h-[300px] rounded-md border p-4">
+            <div className="space-y-4">
+              {emergencyMessages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`p-3 rounded-lg ${
+                    message.priority === "high" 
+                      ? "bg-destructive/10 border border-destructive/20" 
+                      : "bg-muted"
+                  }`}
+                >
+                  <div className="flex justify-between items-start">
+                    <p className="text-sm font-medium">{message.message}</p>
+                    <span className="text-xs text-muted-foreground">{message.timestamp}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default EmergencySection;
