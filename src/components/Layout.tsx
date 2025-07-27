@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { 
   MapPin, 
   Activity, 
@@ -52,7 +53,7 @@ const Layout = ({ children }: LayoutProps) => {
             </div>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex space-x-2">
+            <nav className="hidden md:flex items-center space-x-2">
               {navigation.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -74,6 +75,9 @@ const Layout = ({ children }: LayoutProps) => {
                   </Button>
                 );
               })}
+              <div className="border-l border-border/50 ml-2 pl-2">
+                <ThemeToggle />
+              </div>
             </nav>
 
             {/* Mobile menu button */}
