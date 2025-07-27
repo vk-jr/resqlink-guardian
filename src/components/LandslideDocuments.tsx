@@ -59,7 +59,7 @@ const LandslideDocuments = () => {
   };
 
   useEffect(() => {
-    const intervalId = setInterval(nextImage, 5000); // 5 second delay for autoplay
+    const intervalId = setInterval(nextImage, 4000); // 5 second delay for autoplay
     return () => clearInterval(intervalId);
   }, [nextImage]);
 
@@ -103,25 +103,7 @@ const LandslideDocuments = () => {
                 </div>
               ))}
               
-              {/* Navigation Buttons */}
-              <div className="absolute inset-0 flex items-center justify-between p-4">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={previousImage}
-                  className="h-8 w-8 bg-background/80 hover:bg-background"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={nextImage}
-                  className="h-8 w-8 bg-background/80 hover:bg-background"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
+
 
               {/* Image Indicators */}
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
