@@ -73,25 +73,10 @@ const WeatherMap = () => {
       .leaflet-container { z-index: 1; }
       .leaflet-popup { z-index: 2; }
       .weather-widget {
-        padding: 6px;
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 4px;
         font-size: 11px;
-        box-shadow: 
-          0 4px 6px -1px rgba(0, 0, 0, 0.1),
-          0 2px 4px -1px rgba(0, 0, 0, 0.06),
-          0 0 0 1px rgba(255, 255, 255, 0.3) inset;
-        transform: translateY(-2px);
-        transition: all 0.2s ease;
-      }
-      .weather-widget:hover {
-        transform: translateY(-4px);
-        box-shadow: 
-          0 8px 12px -1px rgba(0, 0, 0, 0.15),
-          0 4px 6px -1px rgba(0, 0, 0, 0.1),
-          0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(8px);
       }
     `;
     document.head.appendChild(style);
@@ -160,12 +145,12 @@ const WeatherMap = () => {
             .setLatLng([location.lat, location.lng])
             .setContent(`
               <div class="text-[10px] leading-tight">
-                <div class="font-bold text-[11px] mb-0.5 text-blue-600">${location.name}</div>
-                <div class="flex items-center gap-1.5">
+                <div class="font-semibold text-[11px]">${location.name}</div>
+                <div class="flex items-center gap-1.5 mt-0.5">
                   <span class="font-bold text-[13px]">${data.main.temp.toFixed(1)}°C</span>
                   <span class="text-gray-600 text-[10px]">${data.weather[0].main}</span>
                 </div>
-                <div class="flex items-center justify-between text-[9px] text-gray-600 mt-0.5">
+                <div class="flex items-center justify-between text-[9px] text-gray-500 mt-0.5">
                   <span>💧${data.main.humidity}%</span>
                   <span>💨${data.wind.speed}m/s</span>
                 </div>
@@ -198,7 +183,7 @@ const WeatherMap = () => {
             window.L.popup({ closeButton: true, autoClose: true })
               .setLatLng([lat, lng])
               .setContent(`
-                <div class="p-3 bg-white/90 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50" style="width: 220px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 13px;">
+                <div class="p-3 bg-white/90 backdrop-blur-xl" style="width: 220px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
                     <div class="flex items-center justify-between">
                         <span class="text-4xl font-light text-gray-800">${data.main.temp.toFixed(0)}°C</span>
                         <img src="http://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png" alt="${data.weather[0].description}" class="w-12 h-12 -mr-2">
@@ -207,7 +192,7 @@ const WeatherMap = () => {
                         <div class="font-semibold text-gray-700 text-md">${data.weather[0].main}</div>
                         <div class="text-sm text-gray-500">${data.name}</div>
                     </div>
-                    <div class="border-t border-gray-200/80 my-2"></div>
+                    <div class="my-2 border-t border-gray-200/80"></div>
                     <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                         <div class="flex justify-between text-gray-600"><span>Feels like</span> <span class="font-semibold text-gray-800">${data.main.feels_like?.toFixed(0)}°C</span></div>
                         <div class="flex justify-between text-gray-600"><span>Humidity</span> <span class="font-semibold text-gray-800">${data.main.humidity}%</span></div>
@@ -246,21 +231,6 @@ const WeatherMap = () => {
   }, []);
 
   return (
-    <Card className="shadow-lg">
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Globe className="h-5 w-5 text-primary" />
-            <span>Interactive Weather Map</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Badge variant="outline" className="text-xs">
-              Click on map to see weather details
-            </Badge>
-          </div>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
         <div className="space-y-4">
           {isLoading && (
             <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
@@ -288,7 +258,7 @@ const WeatherMap = () => {
           
           {selectedLocation && selectedLocation.weather && selectedLocation.weather[0] && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-              <div className="p-6 bg-muted rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <div className="p-6">
                 <div className="flex items-center space-x-2 mb-3">
                   <Cloud className="h-5 w-5 text-primary" />
                   <span className="text-sm font-medium">Weather Conditions</span>
@@ -304,7 +274,7 @@ const WeatherMap = () => {
                 </p>
               </div>
 
-              <div className="p-6 bg-muted rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <div className="p-6">
                 <div className="flex items-center space-x-2 mb-3">
                   <Thermometer className="h-5 w-5 text-orange-500" />
                   <span className="text-sm font-medium">Temperature & Humidity</span>
@@ -324,7 +294,7 @@ const WeatherMap = () => {
                 </div>
               </div>
 
-              <div className="p-6 bg-muted rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <div className="p-6">
                 <div className="flex items-center space-x-2 mb-3">
                   <Wind className="h-5 w-5 text-green-500" />
                   <span className="text-sm font-medium">Wind Information</span>
@@ -348,8 +318,6 @@ const WeatherMap = () => {
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
   );
 };
 
