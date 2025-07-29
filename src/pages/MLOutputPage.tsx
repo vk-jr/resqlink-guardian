@@ -1,7 +1,9 @@
+import { useState } from "react";
 import Layout from "@/components/Layout";
 import MLOutputCard from "@/components/MLOutputCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { 
   Brain, 
   TrendingUp, 
@@ -12,6 +14,8 @@ import {
 } from "lucide-react";
 
 const MLOutputPage = () => {
+  const [recordLimit, setRecordLimit] = useState(20);
+  
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -26,8 +30,45 @@ const MLOutputPage = () => {
             </p>
           </div>
 
+          {/* Record Count Selector */}
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => setRecordLimit(10)}
+              className={cn(
+                "px-4 py-2 text-sm font-medium rounded-lg transition-colors",
+                recordLimit === 10
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary hover:bg-secondary/80"
+              )}
+            >
+              Last 10 Records
+            </button>
+            <button
+              onClick={() => setRecordLimit(100)}
+              className={cn(
+                "px-4 py-2 text-sm font-medium rounded-lg transition-colors",
+                recordLimit === 100
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary hover:bg-secondary/80"
+              )}
+            >
+              Last 100 Records
+            </button>
+            <button
+              onClick={() => setRecordLimit(1000)}
+              className={cn(
+                "px-4 py-2 text-sm font-medium rounded-lg transition-colors",
+                recordLimit === 1000
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary hover:bg-secondary/80"
+              )}
+            >
+              All Records
+            </button>
+          </div>
+
           {/* Current ML Prediction */}
-          <MLOutputCard />
+          <MLOutputCard limit={recordLimit} />
 
           {/* ML Model Information */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

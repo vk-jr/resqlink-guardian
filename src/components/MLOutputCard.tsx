@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Shield, AlertCircle, Brain } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, Shield, AlertCircle, Brain, RefreshCw, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -45,47 +47,58 @@ interface MLOutputCardProps {
   className?: string;
   showHeader?: boolean;
   showGraphs?: boolean;
+  limit?: number;
 }
 
-const MLOutputCard = ({ className, showHeader = true, showGraphs = true }: MLOutputCardProps) => {
+const MLOutputCard = ({ className, showHeader = true, showGraphs = true, limit = 20 }: MLOutputCardProps) => {
   const [sensorData, setSensorData] = useState<SensorData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const { toast } = useToast();
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('sensor_data')
+        .select('*')
+        .order('timestamp', { ascending: false })
+        .limit(limit);
+
+      if (error) {
+        toast({
+          title: "Error fetching data",
+          description: error.message,
+          variant: "destructive",
+        });
+        throw error;
+      }
+      
+      if (data && data.length > 0) {
+        setSensorData(data.reverse());
+        setLastUpdate(new Date());
+        toast({
+          title: "Data refreshed",
+          description: `Fetched ${data.length} records successfully`,
+        });
+      } else {
+        toast({
+          title: "No data available",
+          description: "No sensor data found",
+          variant: "warning",
+        });
+      }
+      
+    } catch (error) {
+      console.error('Error fetching sensor data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        console.log('Fetching sensor data...');
-        const { data, error } = await supabase
-          .from('sensor_data')
-          .select('*')
-          .order('timestamp', { ascending: false })
-          .limit(20);
-
-        if (error) {
-          console.error('Supabase error:', error);
-          throw error;
-        }
-        
-        console.log('Received data:', data);
-        
-        if (data && data.length > 0) {
-          setSensorData(data.reverse());
-          console.log('Updated state with sensor data');
-        } else {
-          console.log('No data received from Supabase');
-        }
-        
-      } catch (error) {
-        console.error('Error fetching sensor data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    // Initial fetch
     fetchData();
-
-    // Set up real-time subscription
+    
     const subscription = supabase
       .channel('sensor_data_changes')
       .on(
@@ -97,25 +110,19 @@ const MLOutputCard = ({ className, showHeader = true, showGraphs = true }: MLOut
         },
         (payload) => {
           setSensorData(currentData => {
-            console.log('Received real-time update:', payload.new);
             const newData = [...currentData, payload.new as SensorData];
-            if (newData.length > 20) newData.shift();
+            if (newData.length > limit) newData.shift();
             return newData;
           });
+          setLastUpdate(new Date());
         }
       )
-      .subscribe((status) => {
-        console.log('Subscription status:', status);
-      });
-
-    // Refresh data every 5 seconds
-    const interval = setInterval(fetchData, 5000);
+      .subscribe();
 
     return () => {
-      clearInterval(interval);
       subscription.unsubscribe();
     };
-  }, []);
+  }, [limit]);
 
   if (isLoading) {
     return (
@@ -271,46 +278,78 @@ const MLOutputCard = ({ className, showHeader = true, showGraphs = true }: MLOut
 
   return (
     <Card className={cn("w-full", className)}>
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-base font-medium flex items-center gap-2">
           <Brain className="h-5 w-5 text-primary" />
-          <span>ML Predictions & Sensor Data</span>
+          ML Predictions & Sensor Data
         </CardTitle>
+        <div className="flex items-center gap-2">
+          <p className="text-sm text-muted-foreground">
+            Last updated: {lastUpdate.toLocaleTimeString()}
+          </p>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={fetchData}
+            disabled={isLoading}
+          >
+            <RefreshCw className={cn("h-4 w-4 mr-2", isLoading && "animate-spin")} />
+            Refresh
+          </Button>
+        </div>
       </CardHeader>
 
-      <CardContent className="space-y-6">
+      <CardContent>
         {/* Status Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className={cn("border", 
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card className={cn(
+            "transition-colors",
             getAlertColor(latestData.landslide_risk).border,
             getAlertColor(latestData.landslide_risk).bg
           )}>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium">Current Status</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold mb-2">{latestData.landslide_risk}</div>
-              <p className="text-sm text-muted-foreground">{latestData.notification}</p>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between space-x-2">
+                <div className="flex items-center space-x-2">
+                  <AlertTriangle className={cn("h-4 w-4", getAlertColor(latestData.landslide_risk).text)} />
+                  <span className="text-sm font-medium">Current Status</span>
+                </div>
+                <Badge variant={latestData.landslide_risk.toLowerCase() === "high" ? "destructive" : "default"}>
+                  {latestData.landslide_risk}
+                </Badge>
+              </div>
+              <div className="mt-3">
+                <p className="text-sm text-muted-foreground">{latestData.notification}</p>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="border">
-            <CardHeader>
-              <CardTitle className="text-sm font-medium">Risk Probability</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold mb-2">{(latestData.risk_probability * 100).toFixed(1)}%</div>
-              <p className="text-sm text-muted-foreground">Confidence: {latestData.confidence}%</p>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between space-x-2">
+                <div className="flex items-center space-x-2">
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Risk Analysis</span>
+                </div>
+                <div className="text-2xl font-bold">{(latestData.risk_probability * 100).toFixed(1)}%</div>
+              </div>
+              <div className="mt-3">
+                <p className="text-sm text-muted-foreground">Confidence: {latestData.confidence}%</p>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="border">
-            <CardHeader>
-              <CardTitle className="text-sm font-medium">Alert Status</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold mb-2">{latestData.alert}</div>
-              <p className="text-sm text-muted-foreground">{latestData.reasoning}</p>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between space-x-2">
+                <div className="flex items-center space-x-2">
+                  <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Alert Status</span>
+                </div>
+                <Badge>{latestData.alert}</Badge>
+              </div>
+              <div className="mt-3">
+                <p className="text-sm text-muted-foreground">{latestData.reasoning}</p>
+              </div>
             </CardContent>
           </Card>
         </div>
