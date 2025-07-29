@@ -356,10 +356,15 @@ const SensorDashboard = () => {
       <Card className="shadow-card">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Activity className="h-5 w-5 text-primary" />
-              <span>Sensor Data Dashboard</span>
-              <Badge variant="outline">Live</Badge>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center">
+                <img src="/resqlink-logo.png" alt="ResQLink Logo" className="h-10" />
+                <div className="ml-2 font-semibold">ResQLink Admin</div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span>Sensor Data Dashboard</span>
+                <Badge variant="outline">Live</Badge>
+              </div>
             </div>
             <div className="flex items-center space-x-4">
               <p className="text-sm text-muted-foreground">
