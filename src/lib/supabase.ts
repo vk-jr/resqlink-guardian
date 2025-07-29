@@ -23,6 +23,8 @@ export interface SensorData {
   reasoning: string;
   rainfall_24h_mm: number;
   rainfall_3h_mm: number;
+  soil_type: string;
+  slope_degrees: number;
 }
 
 // ML Prediction types

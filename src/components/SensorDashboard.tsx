@@ -21,7 +21,11 @@ import {
   Tooltip, 
   ResponsiveContainer,
   AreaChart,
-  Area
+  Area,
+  PieChart,
+  Pie,
+  Cell,
+  Legend
 } from "recharts";
 import { 
   Activity, 
@@ -45,7 +49,7 @@ const SensorDashboard = () => {
   const fetchSensorData = async () => {
     setIsLoading(true);
     try {
-      // Get the table information first to see available columns
+      console.log('Fetching data from Supabase...');
       let query = supabase
         .from('sensor_data')
         .select('*')
@@ -68,16 +72,21 @@ const SensorDashboard = () => {
       }
 
       // Validate and transform the data
-      const validData = rawData.filter(row => 
-        row.timestamp && 
-        typeof row.predicted_soil_moisture === 'number' && 
-        typeof row.predicted_pore_pressure === 'number'
-      );
+      const validData = rawData.map(row => ({
+        ...row,
+        predicted_soil_moisture: row.predicted_soil_moisture || 0,
+        predicted_pore_pressure: row.predicted_pore_pressure || 0,
+        rainfall_24h_mm: row.rainfall_24h_mm || 0,
+        rainfall_3h_mm: row.rainfall_3h_mm || 0,
+        slope_degrees: row.slope_degrees || 0,
+        soil_type: row.soil_type || 'Unknown',
+        landslide_risk: row.landslide_risk || 'low'
+      }));
 
       if (validData.length === 0) {
         toast({
-          title: "No Valid Data Found",
-          description: "No valid sensor readings available in the database.",
+          title: "No Data Found",
+          description: "No sensor readings available in the database.",
           variant: "destructive",
         });
         return;
@@ -93,11 +102,19 @@ const SensorDashboard = () => {
       });
     } catch (error) {
       console.error('Error fetching sensor data:', error);
-      toast({
-        title: "Data Fetch Error",
-        description: "Unable to load sensor data. Using cached data.",
-        variant: "destructive",
-      });
+      if (error instanceof Error) {
+        toast({
+          title: "Data Fetch Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Data Fetch Error",
+          description: "Unable to load sensor data. Please check your connection.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -171,6 +188,29 @@ const SensorDashboard = () => {
     if (latestReading.landslide_risk.toLowerCase() === 'medium') return 'medium';
     return 'low';
   };
+
+  const getSoilTypeData = () => {
+    // Count occurrences of each soil type
+    const soilTypeCounts = sensorData.reduce((acc, item) => {
+      if (item.soil_type) {
+        acc[item.soil_type] = (acc[item.soil_type] || 0) + 1;
+      }
+      return acc;
+    }, {} as Record<string, number>);
+
+    // Convert to format needed for pie chart
+    return Object.entries(soilTypeCounts).map(([type, count]) => ({
+      name: type,
+      value: count
+    }));
+  };
+
+  const getLatestSlope = () => {
+    const latestReading = sensorData[sensorData.length - 1];
+    return latestReading?.slope_degrees || 0;
+  };
+
+  const SOIL_TYPE_COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD'];
 
   const chartData = formatChartData();
   const riskLevel = getRiskLevel();
@@ -439,6 +479,84 @@ const SensorDashboard = () => {
                 />
               </AreaChart>
             </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Slope and Soil Type Analysis */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Slope Card */}
+        <Card className="shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <TrendingUp className="h-5 w-5 text-orange-500" />
+              <span>Slope Analysis</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col items-center justify-center p-6">
+              <div className="text-4xl font-bold text-orange-500 mb-2">
+                {getLatestSlope().toFixed(1)}°
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">Current Slope Angle</p>
+              <div className="w-full max-w-xs">
+                <div className="h-4 bg-secondary rounded-full overflow-hidden">
+                  <div 
+                    className={cn(
+                      "h-full transition-all",
+                      getLatestSlope() > 45 ? "bg-destructive" :
+                      getLatestSlope() > 30 ? "bg-yellow-500" :
+                      "bg-green-500"
+                    )}
+                    style={{ width: `${Math.min((getLatestSlope() / 90) * 100, 100)}%` }}
+                  />
+                </div>
+                <div className="mt-2 flex justify-between text-xs text-muted-foreground">
+                  <span>Safe (0-30°)</span>
+                  <span>Warning (30-45°)</span>
+                  <span>Danger ({'>'}45°)</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Soil Type Distribution */}
+        <Card className="shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Droplets className="h-5 w-5 text-emerald-500" />
+              <span>Soil Type Distribution</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="w-full h-[250px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={getSoilTypeData()}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                    label={({ name, value, percent }) => 
+                      `${name}: ${(percent * 100).toFixed(0)}%`
+                    }
+                  >
+                    {getSoilTypeData().map((entry, index) => (
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={SOIL_TYPE_COLORS[index % SOIL_TYPE_COLORS.length]} 
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
       </div>
