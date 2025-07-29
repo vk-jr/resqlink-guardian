@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Shield, AlertCircle, Brain, RefreshCw, TrendingUp } from "lucide-react";
+import { AlertTriangle, Shield, AlertCircle, Brain, RefreshCw, TrendingUp, Droplets } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
@@ -301,9 +301,9 @@ const MLOutputCard = ({ className, showHeader = true, showGraphs = true, limit =
 
       <CardContent>
         {/* Status Cards */}
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card className={cn(
-            "transition-colors",
+            "transition-colors relative overflow-hidden",
             getAlertColor(latestData.landslide_risk).border,
             getAlertColor(latestData.landslide_risk).bg
           )}>
@@ -311,44 +311,82 @@ const MLOutputCard = ({ className, showHeader = true, showGraphs = true, limit =
               <div className="flex items-center justify-between space-x-2">
                 <div className="flex items-center space-x-2">
                   <AlertTriangle className={cn("h-4 w-4", getAlertColor(latestData.landslide_risk).text)} />
-                  <span className="text-sm font-medium">Current Status</span>
+                  <span className="text-sm font-medium">Risk Level</span>
                 </div>
-                <Badge variant={latestData.landslide_risk.toLowerCase() === "high" ? "destructive" : "default"}>
+                <Badge variant={latestData.landslide_risk.toLowerCase() === "high" ? "destructive" : "default"}
+                       className="uppercase font-semibold">
                   {latestData.landslide_risk}
                 </Badge>
               </div>
-              <div className="mt-3">
-                <p className="text-sm text-muted-foreground">{latestData.notification}</p>
+              <div className="mt-4">
+                <div className="text-2xl font-bold mb-1">{(latestData.risk_probability * 100).toFixed(1)}%</div>
+                <p className="text-sm text-muted-foreground line-clamp-2">{latestData.notification}</p>
+              </div>
+              <div className="absolute bottom-2 right-2">
+                <Badge variant="secondary" className="text-xs">Updated {new Date(latestData.timestamp).toLocaleTimeString()}</Badge>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="relative overflow-hidden">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between space-x-2">
                 <div className="flex items-center space-x-2">
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Risk Analysis</span>
+                  <Droplets className="h-4 w-4 text-blue-500" />
+                  <span className="text-sm font-medium">Moisture Levels</span>
                 </div>
-                <div className="text-2xl font-bold">{(latestData.risk_probability * 100).toFixed(1)}%</div>
               </div>
-              <div className="mt-3">
-                <p className="text-sm text-muted-foreground">Confidence: {latestData.confidence}%</p>
+              <div className="mt-4">
+                <div className="text-2xl font-bold mb-1">
+                  {latestData.predicted_soil_moisture.toFixed(1)}%
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Ground saturation level
+                </p>
+                <div className="mt-2 h-2 bg-secondary rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-blue-500 transition-all" 
+                    style={{ width: `${latestData.predicted_soil_moisture}%` }}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="relative overflow-hidden">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between space-x-2">
                 <div className="flex items-center space-x-2">
-                  <AlertCircle className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Alert Status</span>
+                  <TrendingUp className="h-4 w-4 text-emerald-500" />
+                  <span className="text-sm font-medium">Prediction Accuracy</span>
                 </div>
-                <Badge>{latestData.alert}</Badge>
               </div>
-              <div className="mt-3">
-                <p className="text-sm text-muted-foreground">{latestData.reasoning}</p>
+              <div className="mt-4">
+                <div className="text-2xl font-bold mb-1">{latestData.confidence}%</div>
+                <p className="text-sm text-muted-foreground">Model confidence score</p>
+                <div className="mt-2 flex items-center gap-2">
+                  <Badge variant="secondary" className="text-xs">ML-driven</Badge>
+                  <Badge variant="secondary" className="text-xs">Real-time</Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between space-x-2">
+                <div className="flex items-center space-x-2">
+                  <AlertCircle className="h-4 w-4 text-orange-500" />
+                  <span className="text-sm font-medium">24h Rainfall</span>
+                </div>
+                <Badge variant="outline">{latestData.alert}</Badge>
+              </div>
+              <div className="mt-4">
+                <div className="text-2xl font-bold mb-1">{latestData.rainfall_24h_mm.toFixed(1)} mm</div>
+                <p className="text-sm text-muted-foreground line-clamp-2">{latestData.reasoning}</p>
+                <div className="mt-2">
+                  <Badge variant="secondary" className="text-xs">3h: {latestData.rainfall_3h_mm.toFixed(1)} mm</Badge>
+                </div>
               </div>
             </CardContent>
           </Card>

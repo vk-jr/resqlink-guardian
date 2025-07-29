@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -41,41 +42,13 @@ const SensorDashboard = () => {
   const [dataRange, setDataRange] = useState<'10' | '100' | 'all'>('10');
   const { toast } = useToast();
 
-  // Generate realistic sensor data for demo
-  const generateSensorData = (): SensorData[] => {
-    const now = new Date();
-    const data: SensorData[] = [];
-    
-    for (let i = 23; i >= 0; i--) {
-      const timestamp = new Date(now.getTime() - i * 60 * 60 * 1000);
-      data.push({
-        id: `sensor_${i}`,
-        timestamp: timestamp.toISOString(),
-        rainfall: Math.random() * 50 + (i < 5 ? 20 : 0), // Higher rainfall in recent hours
-        vibration: Math.random() * 10 + (i < 3 ? 5 : 0), // Higher vibration recently
-        temperature: 20 + Math.random() * 15,
-        moisture: 30 + Math.random() * 40,
-        location: `Sensor ${i % 3 + 1}`
-      });
-    }
-    
-    return data;
-  };
-
   const fetchSensorData = async () => {
     setIsLoading(true);
     try {
       // Get the table information first to see available columns
       let query = supabase
         .from('sensor_data')
-        .select(`
-          id,
-          timestamp,
-          soil_moisture,
-          pore_water_pressure,
-          rainfall_24h_mm,
-          rainfall_3h_mm
-        `)
+        .select('*')
         .order('timestamp', { ascending: false });
 
       // Apply limit based on selected range
@@ -83,37 +56,41 @@ const SensorDashboard = () => {
         query = query.limit(parseInt(dataRange));
       }
 
-      const { data, error } = await query;
-
-      // Log the first row to see the structure
-      if (data && data.length > 0) {
-        console.log('First row structure:', data[0]);
-      }
-
-      console.log('Fetched data:', data);
-      console.log('Fetch error if any:', error);
+      const { data: rawData, error } = await query;
 
       if (error) {
-        console.error('Detailed error:', error);
-        throw error;
+        console.error('Database error:', error);
+        throw new Error(`Failed to fetch sensor data: ${error.message}`);
       }
 
-      if (data && data.length > 0) {
-        // Reverse the data to show oldest to newest
-        setSensorData(data.reverse());
-        setLastUpdate(new Date());
-        
+      if (!rawData) {
+        throw new Error('No data received from database');
+      }
+
+      // Validate and transform the data
+      const validData = rawData.filter(row => 
+        row.timestamp && 
+        typeof row.predicted_soil_moisture === 'number' && 
+        typeof row.predicted_pore_pressure === 'number'
+      );
+
+      if (validData.length === 0) {
         toast({
-          title: "Sensor Data Updated",
-          description: `Loaded ${data.length} readings from the database.`,
-        });
-      } else {
-        toast({
-          title: "No Data Found",
-          description: "No sensor readings available in the database.",
+          title: "No Valid Data Found",
+          description: "No valid sensor readings available in the database.",
           variant: "destructive",
         });
+        return;
       }
+
+      // Reverse the data to show oldest to newest
+      setSensorData(validData.reverse());
+      setLastUpdate(new Date());
+      
+      toast({
+        title: "Sensor Data Updated",
+        description: `Loaded ${validData.length} readings from the database.`,
+      });
     } catch (error) {
       console.error('Error fetching sensor data:', error);
       toast({
@@ -130,7 +107,7 @@ const SensorDashboard = () => {
     // Initial fetch
     fetchSensorData();
 
-    // Set up real-time subscription
+    // Set up real-time subscription with error handling
     const subscription = supabase
       .channel('sensor_updates')
       .on(
@@ -141,17 +118,31 @@ const SensorDashboard = () => {
           table: 'sensor_data'
         },
         async (payload) => {
-          // Fetch latest data when any change occurs
-          await fetchSensorData();
+          try {
+            await fetchSensorData();
+          } catch (error) {
+            console.error('Error in real-time update:', error);
+            toast({
+              title: "Real-time Update Failed",
+              description: "Unable to fetch latest sensor data. Will retry on next update.",
+              variant: "destructive",
+            });
+          }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('Successfully subscribed to real-time updates');
+        } else {
+          console.warn('Subscription status:', status);
+        }
+      });
 
     // Clean up subscription when component unmounts
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [dataRange]); // Added dataRange as dependency since it affects fetching
 
   const formatChartData = () => {
     return sensorData.map(item => ({
@@ -159,8 +150,8 @@ const SensorDashboard = () => {
         hour: '2-digit', 
         minute: '2-digit' 
       }),
-      moisture: item.soil_moisture,
-      pore_water_pressure: item.pore_water_pressure,
+      moisture: item.predicted_soil_moisture,
+      pore_pressure: item.predicted_pore_pressure,
       rainfall_24h: item.rainfall_24h_mm,
       rainfall_3h: item.rainfall_3h_mm
     }));
@@ -176,8 +167,8 @@ const SensorDashboard = () => {
     const latestReading = sensorData[sensorData.length - 1];
     if (!latestReading) return 'low';
     
-    if (latestReading.danger) return 'high';
-    if (latestReading.alert) return 'medium';
+    if (latestReading.landslide_risk.toLowerCase() === 'high') return 'high';
+    if (latestReading.landslide_risk.toLowerCase() === 'medium') return 'medium';
     return 'low';
   };
 
@@ -187,11 +178,29 @@ const SensorDashboard = () => {
   if (isLoading) {
     return (
       <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="shadow-card">
+              <CardContent className="p-6">
+                <div className="animate-pulse space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="h-4 bg-muted rounded w-1/3"></div>
+                    <div className="h-4 bg-muted rounded w-1/4"></div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-8 bg-muted rounded"></div>
+                    <div className="h-4 bg-muted rounded w-2/3"></div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
         <Card className="shadow-card">
           <CardContent className="p-6">
             <div className="animate-pulse space-y-4">
               <div className="h-6 bg-muted rounded w-1/3"></div>
-              <div className="h-40 bg-muted rounded"></div>
+              <div className="h-[300px] bg-muted rounded"></div>
             </div>
           </CardContent>
         </Card>
@@ -202,70 +211,101 @@ const SensorDashboard = () => {
   return (
     <div className="space-y-6">
       {/* Status Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="shadow-card">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Droplets className="h-5 w-5 text-blue-600" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Rainfall Card */}
+        <Card className="shadow-card relative overflow-hidden">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between space-x-2">
+              <div className="flex items-center space-x-2">
+                <Droplets className="h-4 w-4 text-blue-500" />
+                <span className="text-sm font-medium">Rainfall</span>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">24h Rainfall</p>
-                <p className="text-2xl font-bold">{getAverageReading('rainfall_24h_mm').toFixed(1)}mm</p>
-                <p className="text-xs text-muted-foreground mt-1">3h: {getAverageReading('rainfall_3h_mm').toFixed(1)}mm</p>
+              <Badge variant="secondary" className="text-xs">24h Average</Badge>
+            </div>
+            <div className="mt-4">
+              <div className="text-2xl font-bold mb-1">{getAverageReading('rainfall_24h_mm').toFixed(1)}mm</div>
+              <div className="mt-2 flex items-center gap-2">
+                <Badge variant="outline" className="text-xs">3h: {getAverageReading('rainfall_3h_mm').toFixed(1)}mm</Badge>
+              </div>
+              <div className="mt-2 h-2 bg-secondary rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-blue-500 transition-all" 
+                  style={{ width: `${Math.min((getAverageReading('rainfall_24h_mm') / 100) * 100, 100)}%` }}
+                />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="shadow-card">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Droplets className="h-5 w-5 text-blue-600" />
+        {/* Soil Moisture Card */}
+        <Card className="shadow-card relative overflow-hidden">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between space-x-2">
+              <div className="flex items-center space-x-2">
+                <Droplets className="h-4 w-4 text-emerald-500" />
+                <span className="text-sm font-medium">Soil Moisture</span>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Soil Moisture</p>
-                <p className="text-2xl font-bold">{getAverageReading('soil_moisture').toFixed(1)}</p>
+              <Badge variant="secondary" className="text-xs">Ground Level</Badge>
+            </div>
+            <div className="mt-4">
+              <div className="text-2xl font-bold mb-1">{getAverageReading('predicted_soil_moisture').toFixed(1)}%</div>
+              <p className="text-sm text-muted-foreground">Saturation level</p>
+              <div className="mt-2 h-2 bg-secondary rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-emerald-500 transition-all" 
+                  style={{ width: `${Math.min(getAverageReading('predicted_soil_moisture'), 100)}%` }}
+                />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="shadow-card">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-green-600" />
+        {/* Pore Water Pressure Card */}
+        <Card className="shadow-card relative overflow-hidden">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between space-x-2">
+              <div className="flex items-center space-x-2">
+                <TrendingUp className="h-4 w-4 text-violet-500" />
+                <span className="text-sm font-medium">Pore Pressure</span>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Pore Water Pressure</p>
-                <p className="text-2xl font-bold">{getAverageReading('pore_water_pressure').toFixed(1)}</p>
+              <Badge variant="secondary" className="text-xs">Real-time</Badge>
+            </div>
+            <div className="mt-4">
+              <div className="text-2xl font-bold mb-1">{getAverageReading('predicted_pore_pressure').toFixed(1)} kPa</div>
+              <p className="text-sm text-muted-foreground">Ground water pressure</p>
+              <div className="mt-2 flex items-center gap-2">
+                <Badge variant="outline" className="text-xs">Monitoring Active</Badge>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="shadow-card">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <div className={`p-2 rounded-lg ${
-                riskLevel === 'high' ? 'bg-red-100' : 
-                riskLevel === 'medium' ? 'bg-yellow-100' : 'bg-green-100'
-              }`}>
-                <AlertTriangle className={`h-5 w-5 ${
-                  riskLevel === 'high' ? 'text-red-600' : 
-                  riskLevel === 'medium' ? 'text-yellow-600' : 'text-green-600'
-                }`} />
+        {/* Risk Level Card */}
+        <Card className={cn(
+          "shadow-card relative overflow-hidden",
+          riskLevel === 'high' ? 'border-destructive bg-destructive/10' : 
+          riskLevel === 'medium' ? 'border-yellow-500 bg-yellow-500/10' : 
+          'border-green-500 bg-green-500/10'
+        )}>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between space-x-2">
+              <div className="flex items-center space-x-2">
+                <AlertTriangle className={cn(
+                  "h-4 w-4",
+                  riskLevel === 'high' ? 'text-destructive' : 
+                  riskLevel === 'medium' ? 'text-yellow-500' : 
+                  'text-green-500'
+                )} />
+                <span className="text-sm font-medium">Risk Level</span>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Risk Level</p>
-                <p className={`text-2xl font-bold capitalize ${
-                  riskLevel === 'high' ? 'text-red-600' : 
-                  riskLevel === 'medium' ? 'text-yellow-600' : 'text-green-600'
-                }`}>
-                  {riskLevel}
-                </p>
+              <Badge variant={riskLevel === 'high' ? 'destructive' : 'outline'} className="uppercase font-semibold">
+                {riskLevel}
+              </Badge>
+            </div>
+            <div className="mt-4">
+              <p className="text-sm text-muted-foreground">Current assessment based on all sensor data</p>
+              <div className="mt-2 flex items-center gap-2">
+                <Badge variant="secondary" className="text-xs">Updated {lastUpdate.toLocaleTimeString()}</Badge>
               </div>
             </div>
           </CardContent>
@@ -391,7 +431,7 @@ const SensorDashboard = () => {
                 <Tooltip />
                 <Area
                   type="monotone"
-                  dataKey="pore_water_pressure"
+                  dataKey="pore_pressure"
                   stroke="#8b5cf6"
                   fill="#8b5cf6"
                   fillOpacity={0.3}
