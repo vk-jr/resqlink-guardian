@@ -1,35 +1,123 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Globe } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+
+interface Message {
+  id: number;
+  message: string;
+  timestamp: string;
+  priority: string;
+}
 
 const EmergencySection = () => {
-  // Mock emergency messages for demonstration
-  const emergencyMessages = [
-    {
-      id: 1,
-      message: "⚠️ High risk of landslide detected in Wayanad region",
-      timestamp: "10:30 AM",
-      priority: "high"
-    },
-    {
-      id: 2,
-      message: "🚨 Emergency response team dispatched to affected area",
-      timestamp: "10:35 AM",
-      priority: "high"
-    },
-    {
-      id: 3,
-      message: "ℹ️ Local authorities have been notified",
-      timestamp: "10:40 AM",
-      priority: "medium"
-    },
-    {
-      id: 4,
-      message: "📢 Evacuation procedures initiated in high-risk zones",
-      timestamp: "10:45 AM",
-      priority: "high"
-    },
-  ];
+  const [emergencyMessages, setEmergencyMessages] = useState<Message[]>([]);
+
+  useEffect(() => {
+    // Initial fetch of messages
+    fetchMessages();
+
+    // Subscribe to real-time changes
+    const channel = supabase
+      .channel('messages-channel')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages'
+        },
+        (payload) => {
+          console.log('Real-time update:', payload);
+          fetchMessages();
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const fetchMessages = async () => {
+    try {
+      console.log('Fetching messages...');
+      // Fetch messages from the messages table
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*') // Select all fields
+        .order('id', { ascending: false }); // Order by id instead of timestamp
+
+      if (error) {
+        console.error('Error fetching messages:', error);
+        return;
+      }
+
+      console.log('Received data from messages table:', data);
+
+      if (!data || data.length === 0) {
+        // If no messages, set some default messages
+        const defaultMessages = [
+          {
+            id: 1,
+            message: "⚠️ High risk of landslide detected in Wayanad region",
+            timestamp: "10:30 AM",
+            priority: "high"
+          },
+          {
+            id: 2,
+            message: "🚨 Emergency response team dispatched to affected area",
+            timestamp: "10:35 AM",
+            priority: "high"
+          },
+          {
+            id: 3,
+            message: "ℹ️ Local authorities have been notified",
+            timestamp: "10:40 AM",
+            priority: "medium"
+          },
+          {
+            id: 4,
+            message: "📢 Evacuation procedures initiated in high-risk zones",
+            timestamp: "10:45 AM",
+            priority: "high"
+          }
+        ];
+        setEmergencyMessages(defaultMessages);
+        return;
+      }
+
+      const formattedMessages = data.map(msg => ({
+        id: msg.id,
+        message: msg.message || '', // Using the 'message' column from the database
+        timestamp: new Date(msg.created_at).toLocaleTimeString(), // Using created_at for timestamp
+        priority: 'medium' // Default priority
+      }));
+
+      console.log('Formatted messages:', formattedMessages);
+      setEmergencyMessages(formattedMessages);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      // On error, show default messages
+      const defaultMessages = [
+        {
+          id: 1,
+          message: "⚠️ High risk of landslide detected in Wayanad region",
+          timestamp: "10:30 AM",
+          priority: "high"
+        },
+        {
+          id: 2,
+          message: "🚨 Emergency response team dispatched to affected area",
+          timestamp: "10:35 AM",
+          priority: "high"
+        }
+      ];
+      setEmergencyMessages(defaultMessages);
+    }
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -64,7 +152,7 @@ const EmergencySection = () => {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3 w-3 bg-destructive"></span>
             </span>
-            <span>Emergency Alerts</span>
+            <span>MM32 Chats</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
