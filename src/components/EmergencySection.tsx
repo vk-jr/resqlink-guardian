@@ -6,7 +6,9 @@ import { supabase } from "@/lib/supabase";
 
 interface Message {
   id: number;
+  username: string;
   message: string;
+  node: string;
   timestamp: string;
   priority: string;
 }
@@ -62,25 +64,33 @@ const EmergencySection = () => {
         const defaultMessages = [
           {
             id: 1,
+            username: "System",
             message: "⚠️ High risk of landslide detected in Wayanad region",
+            node: "Central Node",
             timestamp: "10:30 AM",
             priority: "high"
           },
           {
             id: 2,
+            username: "System",
             message: "🚨 Emergency response team dispatched to affected area",
+            node: "Central Node",
             timestamp: "10:35 AM",
             priority: "high"
           },
           {
             id: 3,
+            username: "System",
             message: "ℹ️ Local authorities have been notified",
+            node: "Central Node",
             timestamp: "10:40 AM",
             priority: "medium"
           },
           {
             id: 4,
+            username: "System",
             message: "📢 Evacuation procedures initiated in high-risk zones",
+            node: "Central Node",
             timestamp: "10:45 AM",
             priority: "high"
           }
@@ -91,9 +101,11 @@ const EmergencySection = () => {
 
       const formattedMessages = data.map(msg => ({
         id: msg.id,
-        message: msg.message || '', // Using the 'message' column from the database
-        timestamp: new Date(msg.created_at).toLocaleTimeString(), // Using created_at for timestamp
-        priority: 'medium' // Default priority
+        username: msg.username || 'Unknown',
+        message: msg.message || '',
+        node: msg.from_node || '',
+        timestamp: new Date(msg.created_at).toLocaleTimeString(),
+        priority: 'medium'
       }));
 
       console.log('Formatted messages:', formattedMessages);
@@ -104,13 +116,17 @@ const EmergencySection = () => {
       const defaultMessages = [
         {
           id: 1,
+          username: "System",
           message: "⚠️ High risk of landslide detected in Wayanad region",
+          node: "Central Node",
           timestamp: "10:30 AM",
           priority: "high"
         },
         {
           id: 2,
+          username: "System",
           message: "🚨 Emergency response team dispatched to affected area",
+          node: "Central Node",
           timestamp: "10:35 AM",
           priority: "high"
         }
@@ -167,9 +183,15 @@ const EmergencySection = () => {
                       : "bg-muted"
                   }`}
                 >
-                  <div className="flex justify-between items-start">
-                    <p className="text-sm font-medium">{message.message}</p>
-                    <span className="text-xs text-muted-foreground">{message.timestamp}</span>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-semibold text-primary">{message.username}</span>
+                      <span className="text-xs text-muted-foreground">{message.timestamp}</span>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm whitespace-pre-line">{message.message}</p>
+                      <p className="text-xs text-muted-foreground">Node: {message.node}</p>
+                    </div>
                   </div>
                 </div>
               ))}
