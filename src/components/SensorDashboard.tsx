@@ -74,8 +74,8 @@ const SensorDashboard = () => {
       // Validate and transform the data
       const validData = rawData.map(row => ({
         ...row,
-        predicted_soil_moisture: row.predicted_soil_moisture || 0,
-        predicted_pore_pressure: row.predicted_pore_pressure || 0,
+        soil_moisture: row.soil_moisture || 0,
+        pore_water_pressure: row.pore_water_pressure || 0,
         rainfall_24h_mm: row.rainfall_24h_mm || 0,
         rainfall_3h_mm: row.rainfall_3h_mm || 0,
         slope_degrees: row.slope_degrees || 0,
@@ -167,8 +167,8 @@ const SensorDashboard = () => {
         hour: '2-digit', 
         minute: '2-digit' 
       }),
-      moisture: item.predicted_soil_moisture,
-      pore_pressure: item.predicted_pore_pressure,
+      moisture: item.soil_moisture,
+      pore_water_pressure: item.pore_water_pressure,
       rainfall_24h: item.rainfall_24h_mm,
       rainfall_3h: item.rainfall_3h_mm
     }));
@@ -288,7 +288,7 @@ const SensorDashboard = () => {
               <Badge variant="secondary" className="text-xs">Ground Level</Badge>
             </div>
             <div className="mt-4">
-              <div className="text-2xl font-bold mb-1">{getAverageReading('predicted_soil_moisture').toFixed(1)}%</div>
+              <div className="text-2xl font-bold mb-1">{getAverageReading('soil_moisture').toFixed(1)}%</div>
               <p className="text-sm text-muted-foreground">Saturation level</p>
               <div className="mt-2 h-2 bg-secondary rounded-full overflow-hidden">
                 <div 
@@ -311,7 +311,7 @@ const SensorDashboard = () => {
               <Badge variant="secondary" className="text-xs">Real-time</Badge>
             </div>
             <div className="mt-4">
-              <div className="text-2xl font-bold mb-1">{getAverageReading('predicted_pore_pressure').toFixed(1)} kPa</div>
+              <div className="text-2xl font-bold mb-1">{getAverageReading('pore_water_pressure').toFixed(1)} kPa</div>
               <p className="text-sm text-muted-foreground">Ground water pressure</p>
               <div className="mt-2 flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">Monitoring Active</Badge>
@@ -476,7 +476,7 @@ const SensorDashboard = () => {
                 <Tooltip />
                 <Area
                   type="monotone"
-                  dataKey="pore_pressure"
+                  dataKey="pore_water_pressure"
                   stroke="#8b5cf6"
                   fill="#8b5cf6"
                   fillOpacity={0.3}
