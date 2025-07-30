@@ -41,12 +41,10 @@ const Layout = ({ children }: LayoutProps) => {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center space-x-3">
-              <div className="bg-primary rounded-lg p-2.5 shadow-professional">
-                <Shield className="h-7 w-7 text-primary-foreground" />
-              </div>
+              <img src="/resqlink-logo.png" alt="ResQlink Logo" className="h-10" />
               <div>
                 <h1 className="text-xl font-bold text-primary tracking-wide">
-                  ResQlink Admin
+                  Admin Panel
                 </h1>
                 <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Geological Monitoring</p>
               </div>
