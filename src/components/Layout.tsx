@@ -26,6 +26,7 @@ const Layout = ({ children }: LayoutProps) => {
     { name: "Live Weather Map", href: "/weather-map", icon: MapPin },
     { name: "Sensor Data", href: "/sensor-data", icon: Activity },
     { name: "ML Output", href: "/ml-output", icon: Brain },
+    { name: "3D Model", href: "/3d-model", icon: Shield },
   ];
 
   const isActive = (href: string) => {
