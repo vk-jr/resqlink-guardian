@@ -108,11 +108,20 @@ const EmergencyMap = () => {
       sosLocations.forEach((location) => {
         const sosIcon = window.L.divIcon({
           html: `
-            <div class="bg-destructive text-white px-2 py-1 rounded-full text-xs font-bold animate-pulse">
-              SOS
+            <div class="relative">
+              <div class="absolute -inset-3 bg-red-500 rounded-full opacity-25 animate-ping"></div>
+              <div class="absolute -inset-3 bg-red-500 rounded-full opacity-25 animate-ping" style="animation-delay: 0.5s"></div>
+              <div class="relative bg-gradient-to-r from-red-500 to-rose-600 text-white px-3 py-1 rounded-lg shadow-lg font-bold flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
+                </svg>
+                SOS
+              </div>
             </div>
           `,
           className: 'custom-div-icon',
+          iconSize: [60, 30],
+          iconAnchor: [30, 15],
         });
 
         window.L.marker([location.latitude, location.longitude], { icon: sosIcon })
