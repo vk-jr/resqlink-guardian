@@ -5,6 +5,8 @@ interface SOSLocation {
   latitude: number;
   longitude: number;
   id: string;
+  name: string;
+  phone: string;
 }
 
 const EmergencyMap = () => {
@@ -17,7 +19,7 @@ const EmergencyMap = () => {
     try {
       const { data, error } = await supabase
         .from('users')
-        .select('id, latitude, longitude')
+        .select('id, latitude, longitude, name, phone')
         .not('latitude', 'is', null)
         .not('longitude', 'is', null);
 
@@ -127,9 +129,16 @@ const EmergencyMap = () => {
         window.L.marker([location.latitude, location.longitude], { icon: sosIcon })
           .addTo(map)
           .bindPopup(`
-            <div class="p-2 text-center">
-              <div class="font-bold text-red-600 mb-1">EMERGENCY SOS</div>
-              <div class="text-sm">Location: ${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}</div>
+            <div class="p-3 text-center">
+              <div class="font-bold text-red-600 mb-2">EMERGENCY SOS</div>
+              <div class="text-sm mb-2">
+                <div class="font-semibold">${location.name}</div>
+                <div class="text-gray-600 mb-2">${location.phone}</div>
+                <div class="text-xs text-gray-500">Location: ${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}</div>
+              </div>
+              <a href="tel:${location.phone}" class="inline-block px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-medium">
+                Call Now
+              </a>
             </div>
           `);
       });
