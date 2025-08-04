@@ -14,6 +14,32 @@ const EmergencyMap = () => {
   const [sosLocations, setSOSLocations] = useState<SOSLocation[]>([]);
   const [map, setMap] = useState<any>(null);
 
+  // Handle rescue action
+  const handleRescue = async (userId: string) => {
+    if (!window.confirm('Are you sure this person has been rescued?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({ latitude: null, longitude: null })
+        .eq('id', userId);
+
+      if (error) {
+        alert('Failed to update rescue status');
+        console.error('Error updating rescue status:', error);
+        return;
+      }
+
+      alert('Successfully marked as rescued!');
+      // The map will update automatically due to the real-time subscription
+    } catch (error) {
+      alert('Failed to update rescue status');
+      console.error('Error:', error);
+    }
+  };
+
   // Fetch SOS locations from Supabase
   const fetchSOSLocations = async () => {
     try {
@@ -98,6 +124,9 @@ const EmergencyMap = () => {
 
   // Update markers when SOS locations change
   useEffect(() => {
+    // Make handleRescue available to the window object for popup access
+    (window as any).handleRescue = handleRescue;
+
     if (map && sosLocations.length > 0) {
       // Clear existing markers
       map.eachLayer((layer: any) => {
@@ -129,16 +158,21 @@ const EmergencyMap = () => {
         window.L.marker([location.latitude, location.longitude], { icon: sosIcon })
           .addTo(map)
           .bindPopup(`
-            <div class="p-3 text-center">
-              <div class="font-bold text-red-600 mb-2">EMERGENCY SOS</div>
-              <div class="text-sm mb-2">
-                <div class="font-semibold">${location.name}</div>
-                <div class="text-gray-600 mb-2">${location.phone}</div>
-                <div class="text-xs text-gray-500">Location: ${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}</div>
+            <div class="p-3">
+              <div class="text-center">
+                <div class="text-red-500 font-bold text-lg mb-2">EMERGENCY SOS</div>
+                <div class="font-medium text-gray-900">${location.name}</div>
+                <div class="text-blue-600 font-medium">+${location.phone}</div>
+                <div class="text-xs text-gray-500 mt-1 mb-3">Location: ${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}</div>
+                <div class="flex gap-2">
+                  <a href="tel:${location.phone}" class="flex-1 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium transition-all active:scale-95">
+                    Call Now
+                  </a>
+                  <button onclick="window.handleRescue('${location.id}')" class="flex-1 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium transition-all active:scale-95">
+                    Rescued
+                  </button>
+                </div>
               </div>
-              <a href="tel:${location.phone}" class="inline-block px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-medium">
-                Call Now
-              </a>
             </div>
           `);
       });
