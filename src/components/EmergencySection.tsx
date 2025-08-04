@@ -3,6 +3,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Globe } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import EmergencyMap from "./EmergencyMap";
 
 interface Message {
   id: number;
@@ -146,16 +147,8 @@ const EmergencySection = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="aspect-[16/9] bg-muted rounded-lg overflow-hidden">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d15735.325582281553!2d76.08340955!3d10.7864805!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sin!4v1627366482244!5m2!1sen!2sin"
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              allowFullScreen={true}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
+          <div className="aspect-[16/9] bg-muted rounded-lg overflow-hidden relative">
+            <EmergencyMap />
           </div>
         </CardContent>
       </Card>
