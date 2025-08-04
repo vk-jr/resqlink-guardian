@@ -52,18 +52,11 @@ const WeatherMap = () => {
   const apiKey = "1635890035cbba097fd5c26c8ea672a1";  // Updated API key
   const { toast } = useToast();
 
-  // Disaster-prone and significant weather monitoring locations worldwide
+  // Monitoring locations in Kerala and nearby areas
   const monitoredLocations = [
-    { lat: 10.8505, lng: 76.2711, name: "Kerala, India" },        // Landslide prone
-    { lat: -33.8688, lng: 151.2093, name: "Sydney" },             // Bushfire prone
-    { lat: 35.6762, lng: 139.6503, name: "Tokyo" },               // Earthquake prone
-    { lat: 25.7617, lng: -80.1918, name: "Miami" },               // Hurricane prone
-    { lat: -6.2088, lng: 106.8456, name: "Jakarta" },             // Flood prone
-    { lat: 19.4326, lng: -99.1332, name: "Mexico City" },         // Earthquake zone
-    { lat: 14.5995, lng: 120.9842, name: "Manila" },              // Typhoon prone
-    { lat: -22.9068, lng: -43.1729, name: "Rio" },                // Landslide risk
-    { lat: 31.2304, lng: 121.4737, name: "Shanghai" },            // Flood prone
-    { lat: 37.7749, lng: -122.4194, name: "San Francisco" }       // Seismic zone
+    { lat: 12.9716, lng: 77.5946, name: "Bangalore" },    // Karnataka
+    { lat: 8.8932, lng: 76.6141, name: "Thiruvananthapuram" }, // South Kerala
+    { lat: 17.3850, lng: 78.4867, name: "Hyderabad" },       // Telangana
   ];
 
   useEffect(() => {
@@ -97,8 +90,11 @@ const WeatherMap = () => {
         const map = window.L.map(mapRef.current, {
           zoomControl: true,
           scrollWheelZoom: true,
-          doubleClickZoom: true
-        }).setView([10.8505, 76.2711], 6);  // Centered on South India (Kerala)
+          doubleClickZoom: true,
+          center: [12.2602, 76.2711],  // Kerala coordinates
+          zoom: 6,
+          minZoom: 4  // Prevent zooming out too far
+        });
 
         window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '© OpenStreetMap contributors'
